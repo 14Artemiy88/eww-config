@@ -1,0 +1,83 @@
+(defpoll timer :interval "1s" `scripts/timer`)
+(defvar timers '["5", "9", "23"]')
+(defvar show_set_timers false)
+
+(defwidget timerstuff []
+    (box
+        :class "stuff timerstuff"
+      ;;  :height 110
+        :vscroll true
+        :orientation "h"
+        :space-evenly true
+       ;; :visible {timer != "[]"}
+
+
+      ;;   (box :class "timer_buttons"
+      ;;        :orientation "h"
+      ;;        :space-evenly true
+      ;;        :halign "start"
+      ;;        :spacing 10
+;;
+      ;;         (for timer in {timers}
+      ;;             (button :valign "start" :class "set_timer" :onclick "timer ${timer}" {timer})
+      ;;         )
+      ;;   )
+
+        (show_set_timers)
+
+        (box :orientation "v"
+            (for time in {timer}
+                (eventbox
+                    :onscroll "bash ${EWW_CONFIG_DIR}/scripts/timer up '${time.file}'"
+                    :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer up '${time.file}'"
+                    :onrightclick "bash ${EWW_CONFIG_DIR}/scripts/timer down '${time.file}'"
+                    :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}'"
+                    (label :halign "center" :class "timer" :text "${time.timer}")
+                )
+            )
+        )
+
+
+    )
+)
+
+(defwidget show_set_timers []
+	(eventbox
+	    :onhover "eww update show_set_timers=true"
+        :onhoverlost "eww update show_set_timers=false"
+        :height 10
+
+        (box
+            :orientation "h"
+            :space-evenly "false"
+            :spacing "2"
+
+
+            (revealer
+                :class "timer_buttons"
+                :transition "slideleft"
+                :reveal {show_set_timers == "false"}
+                :duration "550ms"
+
+                (label :halign "center" :style "font-size: 27px; padding-left:10px;" :text "󰁫" )
+            )
+            (revealer
+                :transition "slideleft"
+                :reveal show_set_timers
+                :duration "550ms"
+
+              (box :class "timer_buttons"
+                   :orientation "h"
+                   :space-evenly true
+                   :halign "start"
+                   :spacing 10
+
+                    (for timer in {timers}
+                        (button :valign "start" :class "set_timer" :onclick "timer ${timer}" {timer})
+                    )
+              )
+          )
+
+        )
+	)
+)

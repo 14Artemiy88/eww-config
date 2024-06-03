@@ -1,0 +1,25 @@
+.timerstuff {
+  min-width: 290px;
+  margin-top: 5px;
+  padding: 0 14px 0 0;
+
+  .timer {
+    font-family: LED;
+    font-size: 35px;
+  }
+
+  .timer_buttons {
+    padding: 5px;
+    .set_timer {
+      padding: 7px;
+      //border: $border;
+      background-color: $background;
+      border-radius: $br;
+
+      &:hover {
+        box-shadow: inset 0px 0px 3px #00cccc;
+      }
+    }
+  }
+
+}

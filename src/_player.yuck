@@ -1,0 +1,53 @@
+(defpoll player :interval "1s" "scripts/player")
+
+(defwidget playerstuff []
+    (box
+        :class "playerstuff"
+        :orientation "v"
+        :space-evenly false
+        :tooltip {player.title}
+        (button
+            ;class "button"
+            :height 160
+           ;; :style "background-image: url('${player.image}');  background-size: cover; "
+            :onclick "scripts/player_pausing pause"
+            (image :path {player.image} :image-height 160 ) ;; :image-width 300
+        )
+        ( box :class "button" :halign "start" :orientation "h"
+            (label :text {player.status} )
+            ;; (label :text " ${player.status}" )
+            ;; (label :text " ${player.status}" )
+        )
+        ( box   :class "time"   :halign "end"   {player.timeleft} )
+        ( label :class "artist" :halign "start" :text {player.artist} :limit-width 60 )
+        ( label :class "title"  :halign "start" :text {player.title}  :limit-width 60 )
+        (playerform)
+    )
+)
+
+(defwidget playerform []
+    (box
+        :orientation "h"
+        :class "playerform"
+        :space-evenly false
+      ;;  :visible { player.title != ""}
+      ;;  :tooltip {formattime(player.position, "%H:%M:%S")}
+
+        (scale
+           :min 0
+           :max 101
+           ;;:active { player.position != ""}
+           :value { player.position ?: 0}
+           :onchange "scripts/player_pausing position {}"
+        )
+    )
+)
+
+(
+    defwindow player
+    :monitor 1
+    :geometry (geometry :x "330" :y "405" :anchor "top left" )
+    :stacking "overlay"
+    :windowtype "toolbar"
+    (playerstuff)
+)

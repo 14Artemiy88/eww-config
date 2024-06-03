@@ -1,0 +1,46 @@
+#!/bin/bash
+
+declare -r MPV_SOCKET="/run/user/1000/mpvsocket"
+declare -r IMG_PATH="$HOME/.cache/eww"
+
+function player_img() {
+    local -r title=$(echo '{ "command": ["get_property", "media-title"] }' | socat - ${MPV_SOCKET} | jq .data | tr -d '"')
+    local -r image_path="$IMG_PATH/$title.png"
+    local -r path=$(echo '{ "command": ["get_property", "path"] }' | socat - ${MPV_SOCKET} | jq .data | tr -d '"')
+    ffmpeg -ss "$1" -loglevel 0 -y -i "$path" "$image_path"
+}
+
+function pause() {
+    position=$(echo '{ "command": ["get_property", "time-pos"] }' | socat - ${MPV_SOCKET} | jq .data | tr -d '"' | cut -d'.' -f 1)
+
+    if [[ $position != "" && $position != "Connection refused" ]]; then
+        player_img "$position"
+        echo '{ "command": ["cycle", "pause"] }' | socat - ${MPV_SOCKET}
+        exit 0
+    fi
+
+    playerctl -p plasma-browser-integration play-pause
+    exit 0
+}
+
+function position() {
+    duration=$(echo '{ "command": ["get_property", "duration"] }' | socat - ${MPV_SOCKET} | jq .data | tr -d '"' | cut -d'.' -f 1)
+    if [[ $duration != "" && $duration != "Connection refused" ]]; then
+        ((pos = $1 * "$duration" / 100 ))
+        player_img "$(date -u -d @"$pos" +'%H:%M:%S')"
+        echo "{ \"command\": [\"set_property\", \"time-pos\", $pos] }" | socat - ${MPV_SOCKET}
+        exit 0
+    fi
+
+    length=$(playerctl --player plasma-browser-integration metadata -f '{{ mpris:length }}')
+    if [[ -n $length ]]; then
+        playerctl position $(( $1 * $length / 100000000 ))
+    fi
+    exit 0
+}
+
+
+
+if   [[ "$1" == "pause" ]];    then pause
+elif [[ "$1" == "position" ]]; then position "$2"
+fi

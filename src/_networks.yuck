@@ -1,0 +1,42 @@
+(defpoll networks :interval "1s" "scripts/network")
+
+(defwidget networkstuff []
+    (scroll
+        :hscroll false
+        :vscroll true
+        :width 300
+        :height 315
+        (box
+            :class "networkstuff"
+            :orientation "v"
+            :space-evenly false
+            :halign "start"
+
+            (for entry in networks
+                (buttons :value entry)
+            )
+        )
+    )
+)
+
+(defwidget buttons [value]
+    (button
+        :class "network ${value.status}"
+        :halign "start"
+        :onclick {value.status != "on" ? 'nmcli --ask con up "${value.name}"' : 'nmcli --ask con down "${value.name}"'}
+        (box
+            :orientation "h"
+            (box :class "icon" :halign "start"  "${value.type}")
+            (box :class "name" :halign "center" "${value.name}")
+        )
+    )
+)
+
+(
+    defwindow networks
+    :monitor 1
+    :geometry (geometry :x "331" :y "570" :anchor "top left" )
+    :stacking "overlay"
+    :windowtype "toolbar"
+    (networkstuff)
+)
