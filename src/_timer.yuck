@@ -5,23 +5,11 @@
 (defwidget timerstuff []
     (box
         :class "stuff timerstuff"
-      ;;  :height 110
         :vscroll true
         :orientation "h"
         :space-evenly true
-       ;; :visible {timer != "[]"}
-
-
-      ;;   (box :class "timer_buttons"
-      ;;        :orientation "h"
-      ;;        :space-evenly true
-      ;;        :halign "start"
-      ;;        :spacing 10
-;;
-      ;;         (for timer in {timers}
-      ;;             (button :valign "start" :class "set_timer" :onclick "timer ${timer}" {timer})
-      ;;         )
-      ;;   )
+        :halign "start"
+        :width 315
 
         (show_set_timers)
 
@@ -51,7 +39,6 @@
             :orientation "h"
             :space-evenly "false"
             :spacing "2"
-
 
             (revealer
                 :class "timer_buttons"

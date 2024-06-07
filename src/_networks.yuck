@@ -26,8 +26,8 @@
         :onclick {value.status != "on" ? 'nmcli --ask con up "${value.name}"' : 'nmcli --ask con down "${value.name}"'}
         (box
             :orientation "h"
-            (box :class "icon" :halign "start"  "${value.type}")
-            (box :class "name" :halign "center" "${value.name}")
+            (label :class "icon" :halign "start"  :text "${value.type}")
+            (label :class "name" :halign "center" :text "${value.name}")
         )
     )
 )

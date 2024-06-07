@@ -21,19 +21,8 @@
         ( box   :class "time"   :halign "end"   {player.timeleft} )
         ( label :class "artist" :halign "start" :text {player.artist} :limit-width 60 )
         ( label :class "title"  :halign "start" :text {player.title}  :limit-width 60 )
-        (playerform)
-    )
-)
-
-(defwidget playerform []
-    (box
-        :orientation "h"
-        :class "playerform"
-        :space-evenly false
-      ;;  :visible { player.title != ""}
-      ;;  :tooltip {formattime(player.position, "%H:%M:%S")}
-
         (scale
+            :class "progress"
            :min 0
            :max 101
            ;;:active { player.position != ""}

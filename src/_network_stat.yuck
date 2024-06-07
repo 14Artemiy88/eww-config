@@ -8,8 +8,6 @@
         :class "stuff networkstatstuff"
         :halign "start"
 
-        ;; {EWW_NET["enp0s31f6"].NET_UP}
-        ;; {EWW_NET["enp0s31f6"].NET_DOWN}
         (box
             :orientation "h"
             :class "totalup"

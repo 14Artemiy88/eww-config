@@ -4,7 +4,7 @@ $font: "Ubuntu Mono Nerd Font";
 //$font: "RobotoMono Nerd Font";
 
 .player {
-  background-color: rgba(0,0,0,.1);
+  background-color: rgba(0, 0, 0, .1);
   border-radius: 7px;
   padding: 0;
   margin: 0;
@@ -12,7 +12,7 @@ $font: "Ubuntu Mono Nerd Font";
 
 tooltip {
   border: $border;
-  background-color: rgba(50,50,50,.7);
+  background-color: rgba(50, 50, 50, .7);
   border-radius: $br;
   padding: 10px 0 0 0;
   margin: 5px 0 0 0;
@@ -40,7 +40,6 @@ tooltip {
   .time {
     text-shadow: $textShadow;
     font-family: $font;
-    //background-color: aqua;
     font-size: 12px;
     margin: -295px 10px 0 0;
     padding: 0 0 0 0;
@@ -57,37 +56,44 @@ tooltip {
     font-family: $font;
     text-shadow: $textShadow;
     margin: -44px 0 0 5px;
-    //margin-top: 320px;
-    // margin-left: 10px;
-    // background-color: #4e4e4e;
   }
 
-  .playerform {
-    all: unset;
-    margin: -36px 0 0 0;
-    padding: 0;
+  .progress {
+    margin: -11px 0 0 0;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
 
-    scale {
-      //margin: 3px 0 0 0;
-      //padding: 0;
-      :hover {
-        //background-color: rgba(0, 0, 0, 0.5);
-      }
+    trough {
+      background-color: rgba(255, 255, 255, 0.2);
+      min-height: 10px;
+      min-width: 285px;
+      padding: 0;
 
-      trough {
-        all: unset;
-        background-color: rgba(255, 255, 255, 0.2);
-        min-height: 10px;
-        min-width: 285px;
-        margin: 24px 0 0 0;
-        padding: 0;
+      highlight {
+        border-right: 2px solid rgba(0, 0, 0, 0.5);
+        //background-color: rgba(255, 255, 255, 0.5);
+        background: linear-gradient(
+                        45deg, #ff0000, #ff7300, #fffb00, #48ff00,
+                        #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000
+        );
+        animation: glowing 200s linear infinite;
+        background-size: 400%;
 
-        highlight {
-          all: unset;
-          background-color: rgba(255, 255, 255, 0.5);
-          border-right: 2px solid rgba(0, 0, 0, 0.5);
-        }
       }
     }
+  }
+
+}
+
+@keyframes glowing {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
   }
 }

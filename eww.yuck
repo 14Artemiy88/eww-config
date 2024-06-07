@@ -5,6 +5,7 @@
 (include "src/_top_apps.yuck")
 (include "src/_networks.yuck")
 (include "src/_network_stat.yuck")
+(include "src/_weather_now.yuck")
 (include "src/_weather.yuck")
 (include "src/_timer.yuck")
 
@@ -48,7 +49,9 @@
         (cpugraphstuff)
         (topstuff)
         (networkstatstuff)
-        (weatherstuff)
+        (weathernow         :weather weather_now)
+        (weatherlistform    :weather weather_day)
+        (weatherdaylistform :weather weather_week)
         (timerstuff)
     )
 )

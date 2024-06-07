@@ -4,7 +4,7 @@
 
 .time {
   color: #ffffff;
-  font-family: LED;
+  font-family: $LED;
   font-size: 55px;
   margin-left: 10px;
 }
@@ -14,13 +14,13 @@
 }
 
 .date {
-  font-family: LED;
+  font-family: $LED;
   font-size: 25px;
 }
 
 .day {
   all: unset;
-  font-family: Ubuntu;
+  font-family: Ubuntu, serif;
   font-size: 15px;
   padding: 4px 0 0 0;
 }

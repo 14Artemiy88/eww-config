@@ -1,7 +1,11 @@
+(defvar arrows '["", "d", "f", "b", "e", "c", "g","a", "h"]')
+
 (defwidget weathernow [weather]
     (box
         :orientation "h"
         :class "stuff weatherform"
+        :halign "start"
+
         (box
             :orientation "v"
             :space-evenly false
