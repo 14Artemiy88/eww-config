@@ -1,4 +1,4 @@
-.weatherform {
+.weathernow {
   min-width: 290px;
   margin-top: 5px;
   padding: 0 14px 0 0;
@@ -18,7 +18,7 @@
     font-size: 35px;
     margin-left: -30px;
     margin-top: -25px;
-    text-shadow: #000000 1px 1px 0, #000000 -1px -1px 0, #000000 1px -1px 0, #000000 -1px 1px 0;
+    text-shadow: $textShadow;
   }
 
   .weather_icon {
@@ -59,22 +59,15 @@
 
   .description {
     margin-top: -3px;
+    margin-left: -55px;
   }
-}
-
-.weatherlistform, .weatherweeklistform {
-  min-width: 300px;
-  margin-top: 5px;
-  padding: 0 0 10px 0;
 }
 
 .weatheritem {
   min-width: 59px;
-  //min-height: 10px;
   margin-top: 5px;
   padding: 10px 0 0 10px;
   margin-left: -7px;
-  //border: #3daee9 1px solid;
 
   .listicon {
     margin-top: 3px;
@@ -84,15 +77,24 @@
     font-size: 12px;
     margin-top: -7px;
   }
+
   .temp {
     font-size: 12px;
     margin-top: 3px;
   }
 }
 
+.weather_by_time_list {
+  min-width: 300px;
+  margin-top: 5px;
+  padding: 0 0 10px 0;
+}
 
-.weatherweeklistform {
+.weather_by_days_list {
+  min-width: 300px;
+  margin-top: 5px;
   padding: 0 0 5px 0;
+
   .temp {
     font-size: 11px;
     margin-left: -10px;

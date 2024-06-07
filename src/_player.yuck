@@ -15,17 +15,16 @@
         )
         ( box :class "button" :halign "start" :orientation "h"
             (label :text {player.status} )
-            ;; (label :text " ${player.status}" )
-            ;; (label :text " ${player.status}" )
+            ;; (label :text " 󰒭" )
+            ;; (label :text " 󰒮" )
         )
         ( box   :class "time"   :halign "end"   {player.timeleft} )
         ( label :class "artist" :halign "start" :text {player.artist} :limit-width 60 )
         ( label :class "title"  :halign "start" :text {player.title}  :limit-width 60 )
         (scale
-            :class "progress"
+           :class "progress"
            :min 0
            :max 101
-           ;;:active { player.position != ""}
            :value { player.position ?: 0}
            :onchange "scripts/player_pausing position {}"
         )

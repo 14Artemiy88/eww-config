@@ -2,30 +2,28 @@
 (defpoll weather_day  :interval "1h"  "scripts/weather day")
 (defpoll weather_week :interval "1h"  "scripts/weather week")
 (defvar days '["", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]')
-(defvar weatherlistform_width 300)
+(defvar weather_by_time_list_width 300)
 
-(defwidget weatherlistform [weather]
+(defwidget weather_by_time_list [weather]
 	(eventbox
-	  ;;  :onhover "eww update weatherlistform_width=600"
-      ;;  :onhoverlost "eww update weatherlistform_width=300"
-        :onclick "eww update weatherlistform_width=${weatherlistform_width+66}"
+        :onclick "eww update weather_by_time_list_width=${weather_by_time_list_width+66}"
         :onrightclick "eww reload"
-        :onmiddleclick "eww update weatherlistform_width=750"
+        :onmiddleclick "eww update weather_by_time_list_width=750"
         :height 10
 
         (scroll
-            :class "stuff weatherlistform"
+            :class "stuff weather_by_time_list"
             :hscroll true
             :vscroll false
-            :width weatherlistform_width
+            :width weather_by_time_list_width
             (box
                 :orientation "h"
                 :space-evenly true
                 (for entry in weather
-                    (weatherlist
+                    (weatheritem
                         :time {formattime(entry.date.unix, "%H:%M")}
                         :temp {entry.temperature.air.C}
-                        :tooltip {entry.temperature.comfort.C}
+                        :tooltip "${entry.temperature.comfort.C}°"
                         :icon {entry.icon}
                         :visible {entry.date.unix > EWW_TIME}
                         :description {entry.description.full}
@@ -36,15 +34,15 @@
     )
 )
 
-(defwidget weatherdaylistform [weather]
+(defwidget weather_by_days_list [weather]
     (box
-        :class "stuff weatherweeklistform"
+        :class "stuff weather_by_days_list"
         :orientation "h"
         :halign "start"
         :width 315
 
         (for entry in weather
-            (weatherlist
+            (weatheritem
                 :time "${formattime(entry.date.unix, "%d")} ${days[formattime(entry.date.unix, "%u")]}."
                 :temp {entry.temperature.air.max.C}
                 :tempn {entry.temperature.air.min.C}
@@ -56,7 +54,7 @@
     )
 )
 
-(defwidget weatherlist [time temp icon visible description ?tooltip ?tempn]
+(defwidget weatheritem [time temp icon visible description ?tooltip ?tempn]
     (box
         :orientation "v"
         :class "weatheritem"
@@ -64,8 +62,14 @@
         :visible visible
         :halign "center"
         (label :class "wtime" :halign "center" :valign "start" :text time )
-        (box :height 33 :tooltip description
-            (image :class "listicon" :valign "fill" :halign "fill" :path "images/gismeteo/new_png/${icon}.png" :image-width 35 )
+        (image
+            :class "listicon"
+            :height 33
+            :tooltip description
+            :valign "fill"
+            :halign "fill"
+            :path "images/gismeteo/new_png/${icon}.png"
+            :image-width 35
         )
         (temperature :temp temp :class "temp" :tooltip tooltip)
         (temperature :temp tempn :class "tempn")
@@ -89,6 +93,6 @@
         :halign "center"
         :valign "end"
         :visible {temp != ""}
-        :tooltip "${tooltip}°"
+        :tooltip tooltip
     )
 )
