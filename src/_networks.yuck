@@ -34,9 +34,9 @@
 
 (
     defwindow networks
-    :monitor 1
+    :monitor 0
     :geometry (geometry :x "331" :y "570" :anchor "top left" )
-    :stacking "overlay"
-    :windowtype "toolbar"
+    :stacking "bg"
+    
     (networkstuff)
 )

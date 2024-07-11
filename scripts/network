@@ -8,6 +8,7 @@ declare -A icons=(
     ["bluetooth"]=""
     ["bridge"]="󰡨"
     ["tun"]="󱠾"
+    ["wireguard"]="󰠥"
 )
 str=""
 while IFS=':' read -r name type device; do
@@ -20,6 +21,6 @@ while IFS=':' read -r name type device; do
     else
         str="$str,$line"
     fi
-done <<< $(nmcli -g NAME,TYPE,DEVICE c)
+done <<< "$(nmcli -g NAME,TYPE,DEVICE c)"
 
 echo "[$str]"

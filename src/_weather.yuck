@@ -71,7 +71,7 @@
             :path "images/gismeteo/new_png/${icon}.png"
             :image-width 35
         )
-        (temperature :temp temp :class "temp" :tooltip tooltip)
+        (temperature :temp temp  :class "temp" :tooltip tooltip)
         (temperature :temp tempn :class "tempn")
     )
 )

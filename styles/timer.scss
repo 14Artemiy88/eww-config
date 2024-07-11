@@ -19,7 +19,19 @@
       transition: box-shadow .2s;
 
       &:hover {
-        box-shadow: inset 0 0 3px #00cccc;
+        box-shadow: $boxShadow;
+      }
+    }
+
+    .set_custom_timer_box {
+      border-radius: $br;
+      &:hover {
+        background-color: $base-color;
+      }
+      .set_custom_timer {
+        margin-right: -125px;
+        padding-left: 5px;
+        border-bottom: $border;
 
       }
     }

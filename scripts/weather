@@ -1,22 +1,11 @@
 #!/bin/bash
 
-declare -a ARROWS=(
-                   ''  # Штиль
-                   'd' # Северный
-                   'f' # Северо-восточный
-                   'b' # Восточный
-                   'e' # Юго-восточный
-                   'c' # Южный
-                   'g' # Юго-западный
-                   'a' # Западный
-                   'h' # Северо-западный
-               )
-
 function get_weather() {
     local -r type="$1"
     local -r params="$2"
+    local -r gismeteo_token=$(cat token)
 
-    res=$(curl -H "X-Gismeteo-Token: $GISMETEO_TOKEN" "https://api.gismeteo.net/v2/weather/$type/4517/$params")
+    res=$(curl -H "X-Gismeteo-Token: $gismeteo_token" "https://api.gismeteo.net/v2/weather/$type/4517/$params")
 
     echo "$res"  | jq .response
 

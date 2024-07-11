@@ -13,10 +13,10 @@
             :onclick "scripts/player_pausing pause"
             (image :path {player.image} :image-height 160 ) ;; :image-width 300
         )
-        ( box :class "button" :halign "start" :orientation "h"
+        ( box :class "button" :halign "start" :orientation "v"
             (label :text {player.status} )
-            ;; (label :text " 󰒭" )
-            ;; (label :text " 󰒮" )
+           ;; (label :text " 󰒭" )
+           ;; (label :text " 󰒮" )
         )
         ( box   :class "time"   :halign "end"   {player.timeleft} )
         ( label :class "artist" :halign "start" :text {player.artist} :limit-width 60 )
@@ -33,9 +33,9 @@
 
 (
     defwindow player
-    :monitor 1
+    :monitor 0
     :geometry (geometry :x "330" :y "405" :anchor "top left" )
-    :stacking "overlay"
-    :windowtype "toolbar"
+    :stacking "bg"
+    
     (playerstuff)
 )

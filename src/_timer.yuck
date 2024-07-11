@@ -1,31 +1,34 @@
 (defpoll timer :interval "1s" `scripts/timer`)
-(defvar timers '["5", "9", "23"]')
+(defvar timers '["5", "9"]')
 (defvar show_set_timers false)
+(defvar show_set_custom_timer false)
 
 (defwidget timerstuff []
     (box
         :class "stuff timerstuff"
         :vscroll true
         :orientation "h"
-        :space-evenly true
+		:space-evenly true
+     ;;   :spacing "110"
+
         :halign "start"
         :width 315
+
 
         (show_set_timers)
 
         (box :orientation "v"
+            :halign "end"
             (for time in {timer}
                 (eventbox
                     :onscroll "bash ${EWW_CONFIG_DIR}/scripts/timer up '${time.file}'"
                     :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer up '${time.file}'"
                     :onrightclick "bash ${EWW_CONFIG_DIR}/scripts/timer down '${time.file}'"
                     :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}'"
-                    (label :halign "center" :class "timer" :text "${time.timer}")
+                    (label :halign "end" :class "timer" :text "${time.timer}")
                 )
             )
         )
-
-
     )
 )
 
@@ -43,14 +46,15 @@
             (revealer
                 :class "timer_buttons"
                 :transition "slideleft"
-                :reveal {show_set_timers == "false"}
+                :reveal {!show_set_custom_timer && !show_set_timers}
                 :duration "550ms"
 
                 (label :halign "center" :style "font-size: 27px; padding-left:10px;" :text "󰁫" )
             )
+
             (revealer
                 :transition "slideleft"
-                :reveal show_set_timers
+                :reveal {show_set_timers}
                 :duration "550ms"
 
               (box :class "timer_buttons"
@@ -62,9 +66,13 @@
                     (for timer in {timers}
                         (button :valign "start" :class "set_timer" :onclick "timer ${timer}" {timer})
                     )
-              )
-          )
+                    (box :class "set_custom_timer_box"
+                         :space-evenly true
 
+                         (input :class "set_custom_timer" :value "15" :onaccept "timer {}")
+                    )
+              )
+            )
         )
 	)
 )

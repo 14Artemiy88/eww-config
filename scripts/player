@@ -59,7 +59,6 @@ function get_mpv_player_metadata() {
         fi
 
         get_json "$title" "" "${timeleft##00:}" "$position" "$position" "$duration" "" "$image_path"
-        exit 0
     fi
 }
 
@@ -73,13 +72,19 @@ EOF
 
 
     if [[ -n "$position" ]]; then
-        get_json "$title" "$artist" "$timeleft" "$timepass" "$position" "$len" "${icons[$(playerctl -p plasma-browser-integration status)]}" $(get_image "$img")
+        get_json "$title" "$artist" "$timeleft" "$timepass" "$position" "$len" "${icons[$(playerctl -p plasma-browser-integration status)]}" "$(get_image "$img")"
     fi
+
+    title=$(playerctl metadata -f "{{ title }}" | sed -e "$postfix" | sed 's/"/\\"/g')
+
+    if [[ -n "$title" ]]; then
+        get_json "$title" "" "${DEFAULT_TIMELEFT}" "${DEFAULT_TIMEPASS}" "${DEFAULT_POSITION}" "${DEFAULT_LENGTH}" "" "${DEFAULT_IMG}"
+    fi
+
 }
 
 function get_json() {
-#    local -r formatted_title="\"title\":\"$(get_title "$1")\""
-    local -r formatted_title="\"title\":\"$1\""
+    local -r formatted_title="\"title\":\"$title\""
     local -r formatted_artist="\"artist\":\"$2\""
     local -r formatted_timeleft="\"timeleft\":\"$3\""
     local -r formatted_timepass="\"timepass\":\"$4\""

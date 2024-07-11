@@ -25,6 +25,7 @@ function pause() {
 
 function position() {
     duration=$(echo '{ "command": ["get_property", "duration"] }' | socat - ${MPV_SOCKET} | jq .data | tr -d '"' | cut -d'.' -f 1)
+    echo "/$duration/"
     if [[ $duration != "" && $duration != "Connection refused" ]]; then
         ((pos = $1 * "$duration" / 100 ))
         player_img "$(date -u -d @"$pos" +'%H:%M:%S')"

@@ -59,7 +59,7 @@
 
   .description {
     margin-top: -3px;
-    margin-left: -55px;
+    margin-left: -155px;
   }
 }
 
@@ -98,10 +98,12 @@
   .temp {
     font-size: 11px;
     margin-left: -10px;
+    text-shadow: $textShadow;
   }
 
   .tempn {
     font-size: 11px;
     margin-left: 10px;
+    text-shadow: $textShadow;
   }
 }
