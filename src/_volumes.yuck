@@ -1,0 +1,37 @@
+(defpoll volumes :interval "1s" "scripts/volumes")
+
+(defwidget volumestuff []
+    (box
+        :class "stuff volumestuff"
+        :orientation "v"
+        :space-evenly false
+        :halign "start"
+
+        (for entry in volumes
+            (volume :value entry)
+        )
+    )
+)
+
+(defwidget volume [value]
+    (box
+        :orientation "v"
+        :tooltip "${value.name}"
+        (label :class "label"  :halign "start" :text "${value.name}" :limit-width 100)
+        (scale
+           :class "volume"
+           :orientation "h"
+           :value "${value.value}"
+           :onchange "pactl set-sink-input-volume ${value.num} {}%"
+       )
+   )
+)
+
+(
+    defwindow volumes
+    :monitor "LCD195VXM+/7YP18445NB"
+    :geometry (geometry :x "331" :y "70" :anchor "top left" )
+    :stacking "bg"
+    
+    (volumestuff)
+)

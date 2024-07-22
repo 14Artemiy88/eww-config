@@ -1,0 +1,27 @@
+.volumestuff {
+  padding: 15px;
+  margin: 5px 0 0 0;
+  min-width: 250px;
+
+
+    .label {
+      //font-family: "Ubuntu Mono", serif;
+      //font-family: "JetBrainsMono NF ", serif;
+      font-size: 12px;
+    }
+
+    .volume {
+      trough {
+        //border: $border;
+        background-color: rgba(0, 102, 102, 0.6);
+        border-radius: 50px;
+        min-height: 8px;
+        min-width: 167px;
+        padding: 0;
+
+        highlight {
+          background-color: $base-color;
+        }
+      }
+    }
+}

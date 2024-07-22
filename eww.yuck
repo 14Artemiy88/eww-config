@@ -1,9 +1,11 @@
-(include "src/_date.yuck")
 (include "src/_player.yuck")
+(include "src/_networks.yuck")
+(include "src/_volumes.yuck")
+
+(include "src/_date.yuck")
 (include "src/_cpu.yuck")
 (include "src/_cpu_graph.yuck")
 (include "src/_top_apps.yuck")
-(include "src/_networks.yuck")
 (include "src/_network_stat.yuck")
 (include "src/_weather_now.yuck")
 (include "src/_weather.yuck")
@@ -11,25 +13,16 @@
 
 (
     defwindow ex
-    :monitor 0               ; Can be either a number (X11 and Wayland) or an output name (X11 only).
-    :geometry                ; Geometry of the window.
-    (
-        geometry             ; Geometry of the window.
-        :anchor "top left"   ; Values include top, center, bottom and left, center, right.
-        :x "3"               ; Position of the window. Values may be provided in px or %.
-        :y "5"               ; Will be relative to anchor.
-        :width "0"           ; Width and height of the window.
-        :height "0"          ; Values may be provided in px or %.
+    :monitor "LCD195VXM+/7YP18445NB"
+    :geometry (
+        geometry
+        :anchor "top left"
+        :x "3"
+        :y "5"
+        :width "0"
+        :height "0"
     )
 
-    ;; :wm-ignore "true"       ; Whether the window manager should ignore this window.
-    ;; :reserve                ; Specify how the window manager should make space for your window.
-    ;; (
-    ;;     struts              ; This is useful for bars, which should not overlap any other windows.
-    ;;     :distance "0"
-    ;;     :side "top"
-    ;; )
-    
     :stacking "bottom"
     :focusable true
 
@@ -51,7 +44,7 @@
         (networkstatstuff)
         (weathernow           :weather weather_now)
         (weather_by_time_list :weather weather_day)
-        (weather_by_days_list   :weather weather_week)
+        (weather_by_days_list :weather weather_week)
         (timerstuff)
     )
 )
