@@ -4,29 +4,24 @@
     (box
         :class "topstuff"
         :orientation "v"
-        :space-evenly false
-        (appslist :values "${top_app.cpu}" )
-        (appslist :values "${top_app.mem}" )
+      ;;  :space-evenly false
+        (appslist :values {top_app.cpu} )
+        (appslist :values {top_app.mem} )
     )
 )
 
 (defwidget appslist [values]
-    (box
-        :orientation "v"
-        (box
-            :class "stuff top_app"
-            :halign "start"
-            :orientation "v"
-            :hexpand false
+	(box
+	    :class "stuff top_app"
+	    :halign "start"
+	    :orientation "v"
+	    ;; :hexpand false
 
-            (for entry in values
-                (box
-                    :class "app"
-                    :orientation "h"
-                    (label :class "name"  :halign "start" :text {entry.name} :limit-width 60 )
-                    (label :class "value" :halign "end"   :text {entry.value} )
-                )
-            )
-        )
-    )
+	    (for entry in values
+	        (box
+	            (label :class "name"  :halign "start" :text {entry.name}  :limit-width 60 )
+	            (label :class "value" :halign "end"   :text {entry.value} )
+	        )
+	    )
+	)
 )
