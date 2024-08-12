@@ -64,7 +64,7 @@
         (label :class "wtime" :halign "center" :valign "start" :text time )
         (image
             :class "listicon"
-            :height 33
+            :height 45
             :tooltip description
             :valign "fill"
             :halign "fill"

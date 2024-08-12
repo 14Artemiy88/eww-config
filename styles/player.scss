@@ -95,3 +95,12 @@ $font: "Ubuntu Mono Nerd Font";
     background-position: 0 0;
   }
 }
+
+.cava {
+  margin-top: -100px;
+  .bar {
+    background-color: $base-color;
+    min-width: 4px;
+    margin-left: 2px;
+  }
+}

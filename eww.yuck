@@ -1,6 +1,6 @@
+(include "src/_volumes.yuck")
 (include "src/_player.yuck")
 (include "src/_networks.yuck")
-(include "src/_volumes.yuck")
 
 (include "src/_date.yuck")
 (include "src/_cpu.yuck")
@@ -12,7 +12,7 @@
 (include "src/_timer.yuck")
 
 (
-    defwindow ex
+    defwindow left
     :monitor "LCD195VXM+/7YP18445NB"
     :geometry (
         geometry
@@ -26,11 +26,11 @@
     :stacking "bottom"
     :focusable true
 
-    (stuff)
+    (left_stuff)
 )
 
 
-(defwidget stuff []
+(defwidget left_stuff []
     (box
         :orientation "v"
         :space-evenly false
@@ -50,4 +50,34 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(
+    defwindow right
+    :monitor "LCD195VXM+/7YP18445NB"
+    :geometry (
+        geometry
+        :anchor "top left"
+        :x "300"
+        :y "5"
+        :width "0"
+        :height "0"
+    )
+
+    :stacking "bottom"
+    :focusable true
+
+    (right_stuff)
+)
+
+(defwidget right_stuff []
+    (box
+        :orientation "v"
+        :monitor "LCD195VXM+/7YP18445NB"
+        :geometry (geometry :x "331" :y "72" :anchor "top left" )
+        :stacking "bg"
+
+        (volumestuff)
+    )
+)
+
 

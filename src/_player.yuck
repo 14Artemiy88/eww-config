@@ -1,3 +1,4 @@
+(deflisten values :initial "0,0,0,0,0,0,0,0,0,0,0,0,0,0" `scripts/cava`)
 (defpoll player :interval "1s" "scripts/player")
 
 (defwidget playerstuff []
@@ -13,10 +14,9 @@
             :onclick "scripts/player_pausing pause"
             (image :path {player.image} :image-height 160 ) ;; :image-width 300
         )
+        (cavastuff)
         ( box :class "button" :halign "start" :orientation "v"
             (label :text {player.status} )
-           ;; (label :text " 󰒭" )
-           ;; (label :text " 󰒮" )
         )
         ( box   :class "time"   :halign "end"   {player.timeleft} )
         ( label :class "artist" :halign "start" :text {player.artist} :limit-width 60 )
@@ -38,4 +38,19 @@
     :stacking "bg"
     
     (playerstuff)
+)
+
+(defwidget cavastuff []
+    (box
+        :class "cava"
+        :orientation "h"
+       ;; :height 70
+
+        (for val in "[${values}0]"
+            (box
+                :class "bar"
+                :style "margin-top: ${100-val}px;"
+            )
+        )
+    )
 )

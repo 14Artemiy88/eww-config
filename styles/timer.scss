@@ -26,6 +26,7 @@
 
     .set_custom_timer_box {
       border-radius: $br;
+      min-height: 33px;
       &:hover {
         background-color: $base-color;
       }
