@@ -28,6 +28,8 @@
            :value { player.position ?: 0}
            :onchange "scripts/player_pausing position {}"
         )
+
+    ;;    (label :class "album" :halign "start" :text "${search(values, '[0-9]+')}")
     )
 )
 
@@ -44,13 +46,13 @@
     (box
         :class "cava"
         :orientation "h"
-       ;; :height 70
 
-        (for val in "[${values}0]"
-            (box
-                :class "bar"
-                :style "margin-top: ${100-val}px;"
-            )
+      ;;  (for val in "[${replace(values, ';', ',')}0]"
+        (for val in "${search(values, '[0-9]+')}"
+           (box
+               :class "bar"
+               :style "margin-top: ${100-val}px;"
+           )
         )
     )
 )

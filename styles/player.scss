@@ -48,7 +48,7 @@ $font: "Ubuntu Mono Nerd Font";
   }
 
   .progress {
-    margin: -11px 0 0 0;
+    margin: -5px 0 0 0;
 
     &:hover {
       background-color: rgba(0, 0, 0, 0.5);
@@ -56,7 +56,7 @@ $font: "Ubuntu Mono Nerd Font";
 
     trough {
       background-color: rgba(255, 255, 255, 0.2);
-      min-height: 10px;
+      min-height: 3px;
       min-width: 285px;
       padding: 0;
 
@@ -104,3 +104,21 @@ $font: "Ubuntu Mono Nerd Font";
     margin-left: 2px;
   }
 }
+
+//$gradientColors: (
+//  0: #ff0000,
+//  1: #ff7300,
+//  2: #fffb00,
+//  3: #48ff00,
+//  4: #00ffd5,
+//  5: #002bff,
+//  6: #7a00ff,
+//  7: #ff00c8,
+//  8: #ff0000
+//);
+//
+//@each $index, $color in $gradientColors {
+//  .cava .bar:nth-child(8n + #{$index}) {
+//    background-color: $color;
+//  }
+//}
