@@ -7,7 +7,7 @@
 (defvar custom_timer1 5)
 (defvar custom_timer2 9)
 (defvar custom_timer3 23)
-(defvar custom_timers '[{"time":custom_timer1,"on":show_set_custom_timer1},{"time":custom_timer2,"on":show_set_custom_timer2},{"time":custom_timer3,"on":false}]    ')
+(defvar custom_timers '[{"time":custom_timer1,"on":show_set_custom_timer1},{"time":custom_timer2,"on":show_set_custom_timer2},{"time":custom_timer3,"on":false}]')
 
 (defwidget timerstuff []
     (box
@@ -96,13 +96,14 @@
         (eventbox
             :class "set_timer"
             :onclick "timer ${custom_timer3}"
-            :onrightclick "eww update show_set_custom_timer3=true"
+            :onrightclick "eww update show_set_custom_timer3=true;"
             :visible {!show_set_custom_timer3}
             (label :text "${custom_timer3}" )
         )
         (input
             :class "set_custom_timer"
             :value "${custom_timer3}"
+            :onchange "eww update custom_timer3={}"
             :onaccept "eww update custom_timer3={}; eww update show_set_custom_timer3=false; timer {}"
             :visible {show_set_custom_timer3}
         )

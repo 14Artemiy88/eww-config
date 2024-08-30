@@ -9,11 +9,18 @@ $font: "Ubuntu Mono Nerd Font";
 
 .playerstuff {
 
+  .no_image {
+    font-size: 50px;
+    font-family: "Deadwax DEMO Extreme", serif;
+    margin: -130px 0 0 14px;
+    padding: 0;
+    text-shadow: $textShadow;
+  }
+
   .button {
     all: unset;
     margin: -290px 0 0 14px;
     padding: 0;
-
   }
 
   image {
@@ -44,11 +51,11 @@ $font: "Ubuntu Mono Nerd Font";
   .title {
     font-family: $font;
     text-shadow: $textShadow;
-    margin: -44px 0 0 5px;
+    margin: -40px 0 0 5px;
   }
 
   .progress {
-    margin: -5px 0 0 0;
+    margin: 0 0 0 0;
 
     &:hover {
       background-color: rgba(0, 0, 0, 0.5);
@@ -99,9 +106,24 @@ $font: "Ubuntu Mono Nerd Font";
 .cava {
   margin-top: -100px;
   .bar {
-    background-color: $base-color;
-    min-width: 4px;
+    //background-color: $base-color;
+    //min-width: 2px;
     margin-left: 2px;
+
+    background: linear-gradient(
+                    45deg,
+                    rgba(255, 0, 0, 0.5),
+                    rgba(255, 115, 0, 0.5),
+                    rgba(255, 251, 0, 0.5),
+                    rgba(72, 255, 0, 0.5),
+                    rgba(0, 255, 213, 0.5),
+                    rgba(0, 43, 255, 0.5),
+                    rgba(122, 0, 255, 0.5),
+                    rgba(255, 0, 200, 0.5),
+                    rgba(255, 0, 0, 0.5)
+    );
+    animation: glowing 200s linear infinite;
+    background-size: 400%;
   }
 }
 

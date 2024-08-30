@@ -3,7 +3,9 @@
 #declare -r IMG_PATH="$HOME/.cache/eww"
 declare -r IMG_PATH="/run/user/1000/eww_player"
 declare -r IMG_SUFFIX=".png"
-declare -r DEFAULT_IMG="images/music4.png"
+#declare -r DEFAULT_IMG="images/music4.png"
+declare -r DEFAULT_TEXT="no image"
+declare -r DEFAULT_IMG=""
 declare -r DEFAULT_LENGTH="1"
 declare -r DEFAULT_POSITION="0"
 declare -r DEFAULT_TIMELEFT=" "
@@ -58,28 +60,31 @@ function get_mpv_player_metadata() {
             image_path="${DEFAULT_IMG}"
         fi
 
-        get_json "$title" "" "${timeleft##00:}" "$position" "$position" "$duration" "" "$image_path"
+        get_json "$title" "" "${timeleft##00:}" "$position" "$position" "$duration" "" "$image_path" "${DEFAULT_TEXT}"
     fi
 }
 
 function get_player_metadata() {
     local -r params="{{ title }}💩{{ artist }}💩{{ position }}💩{{ mpris:length }}💩-{{ duration(mpris:length - position) }}💩{{ duration(position) }}💩{{ mpris:artUrl }}"
-    local -r postfix="s/ — смотреть онлайн в хорошем качестве — Кинопоиск//g"
+    local -r postfix=" — смотреть онлайн в хорошем качестве — Кинопоиск"
     IFS="💩" read -r title artist position len timeleft timepass img << EOF
-$(playerctl -p plasma-browser-integration metadata -f "$params" | sed -e "$postfix")
+$(playerctl -p plasma-browser-integration metadata -f "$params")
 EOF
-#$(playerctl --all-players metadata -f "$params" | sed -e "$postfix")
 
+    text="${DEFAULT_TEXT}"
+    if [[ "$title" =~ $postfix ]]; then
+#        title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g" | sed 's/"/\\"/g')
+        title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g")
+        text="kinopoisk"
+    fi
 
     if [[ -n "$position" ]]; then
         title=$(echo "$title" | sed 's#\\#|#g' | sed 's/"/\\"/g')
-        get_json "$title" "$artist" "$timeleft" "$timepass" "$position" "$len" "${icons[$(playerctl -p plasma-browser-integration status)]}" "$(get_image "$img")"
+        get_json "$title" "$artist" "$timeleft" "$timepass" "$position" "$len" "${icons[$(playerctl -p plasma-browser-integration status)]}" "$(get_image "$img")" "$text"
     fi
 
-    title=$(playerctl metadata -f "{{ title }}" | sed -e "$postfix" | sed 's/"/\\"/g')
-
     if [[ -n "$title" ]]; then
-        get_json "$title" "" "${DEFAULT_TIMELEFT}" "${DEFAULT_TIMEPASS}" "${DEFAULT_POSITION}" "${DEFAULT_LENGTH}" "" "${DEFAULT_IMG}"
+        get_json "$title" "" "${DEFAULT_TIMELEFT}" "${DEFAULT_TIMEPASS}" "${DEFAULT_POSITION}" "${DEFAULT_LENGTH}" "" "${DEFAULT_IMG}" "$text"
     fi
 
 }
@@ -92,8 +97,9 @@ function get_json() {
     local -r formatted_position="\"position\":\"$(($5 * 100 / $6))\""
     local -r formatted_status="\"status\":\"$7\""
     local -r formatted_image="\"image\":\"$8\""
+    local -r formatted_text="\"text\":\"$9\""
 
-    echo "{$formatted_title,$formatted_artist,$formatted_timeleft,$formatted_timepass,$formatted_position,$formatted_status,$formatted_image}"
+    echo "{$formatted_title,$formatted_artist,$formatted_timeleft,$formatted_timepass,$formatted_position,$formatted_status,$formatted_image,$formatted_text}"
     exit 0
 }
 
@@ -103,6 +109,6 @@ fi
 
 get_mpv_player_metadata
 get_player_metadata
-get_json "" "" "${DEFAULT_TIMELEFT}" "${DEFAULT_TIMEPASS}" "${DEFAULT_POSITION}" "${DEFAULT_LENGTH}" "" "${DEFAULT_IMG}"
+get_json "" "" "${DEFAULT_TIMELEFT}" "${DEFAULT_TIMEPASS}" "${DEFAULT_POSITION}" "${DEFAULT_LENGTH}" "" "${DEFAULT_IMG}" "${DEFAULT_TEXT}"
 
 exit 0
