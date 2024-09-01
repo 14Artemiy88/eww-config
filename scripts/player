@@ -77,6 +77,11 @@ EOF
         title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g")
         text="kinopoisk"
     fi
+    if [[ "$title" =~ "Twitch" ]]; then
+#        title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g" | sed 's/"/\\"/g')
+        title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g")
+        text="twitch"
+    fi
 
     if [[ -n "$position" ]]; then
         title=$(echo "$title" | sed 's#\\#|#g' | sed 's/"/\\"/g')
@@ -109,6 +114,6 @@ fi
 
 get_mpv_player_metadata
 get_player_metadata
-get_json "" "" "${DEFAULT_TIMELEFT}" "${DEFAULT_TIMEPASS}" "${DEFAULT_POSITION}" "${DEFAULT_LENGTH}" "" "${DEFAULT_IMG}" "${DEFAULT_TEXT}"
+get_json "" "" "${DEFAULT_TIMELEFT}" "${DEFAULT_TIMEPASS}" "${DEFAULT_POSITION}" "${DEFAULT_LENGTH}" "" "${DEFAULT_IMG}" "silence"
 
 exit 0

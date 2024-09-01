@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # top -> press f -> toggle columns -> W (shift_w) to save
-readarray -t mem_lines <<< "$(top -b -o +RES | head -n 12 | tail -5)"
+readarray -t mem_lines <<< "$(top -b -o +SHR | head -n 12 | tail -5)"
 readarray -t cpu_lines <<< "$(top -b -o +%CPU | head -n 12 | tail -5)"
 
 IFS=' '
