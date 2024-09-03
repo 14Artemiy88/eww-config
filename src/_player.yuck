@@ -14,7 +14,7 @@
             :onclick "scripts/player_pausing pause"
             (image :path {player.image} :image-height 160 ) ;; :image-width 300
         )
-        (label :class "no_image" :text {player.image == "" ? player.text : ""} )
+        (label :class "no_image" :text {player.image == "images/i.png" ? player.text : ""} )
         (cavastuff)
         ( box :class "button" :halign "start" :orientation "v"
             (label :text {player.status} )
