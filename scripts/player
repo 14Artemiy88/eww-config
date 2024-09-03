@@ -3,7 +3,7 @@
 #declare -r IMG_PATH="$HOME/.cache/eww"
 declare -r IMG_PATH="/run/user/1000/eww_player"
 declare -r IMG_SUFFIX=".png"
-declare -r DEFAULT_IMG="images/i.png"
+declare -r DEFAULT_IMG="images/1px.png"
 declare -r DEFAULT_TEXT="no image"
 declare -r DEFAULT_LENGTH="1"
 declare -r DEFAULT_POSITION="0"
@@ -65,22 +65,17 @@ function get_mpv_player_metadata() {
 
 function get_player_metadata() {
     local -r params="{{ title }}💩{{ artist }}💩{{ position }}💩{{ mpris:length }}💩-{{ duration(mpris:length - position) }}💩{{ duration(position) }}💩{{ mpris:artUrl }}"
-    local -r postfix=" — смотреть онлайн в хорошем качестве — Кинопоиск"
     IFS="💩" read -r title artist position len timeleft timepass img << EOF
 $(playerctl -p plasma-browser-integration metadata -f "$params")
 EOF
 
     text="${DEFAULT_TEXT}"
-    if [[ "$title" =~ $postfix ]]; then
-#        title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g" | sed 's/"/\\"/g')
-        title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g")
-        text="kinopoisk"
-    fi
-    if [[ "$title" =~ "Twitch" ]]; then
-#        title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g" | sed 's/"/\\"/g')
-        title=$(playerctl metadata -f "{{ title }}" | sed -e "s/$postfix//g")
-        text="twitch"
-    fi
+    case "$title" in
+        *"Кинопоиск"* ) postfix=" — смотреть онлайн в хорошем качестве — Кинопоиск"; text="kinopoisk";;
+        *"Twitch"* ) postfix="Twitch"; text="twitch";;
+        *"VK"* ) postfix="VK Видео — смотрѣть безплатно"; text="vk video";;
+    esac
+    title=${title//$postfix/};
 
     if [[ -n "$position" ]]; then
         title=$(echo "$title" | sed 's#\\#|#g' | sed 's/"/\\"/g')
