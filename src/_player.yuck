@@ -7,14 +7,16 @@
         :orientation "v"
         :space-evenly false
         :tooltip {player.title}
+        :style "background-image: url('${player.image}');  background-size: contain; background-position: center; background-repeat: no-repeat; "
         (button
             :class "button"
             :height 160
-           ;; :style "background-image: url('${player.image}');  background-size: cover; "
             :onclick "scripts/player_pausing pause ${player.player}"
-            (image :path {player.image} :image-height 160 ) ;; :image-width 300
         )
-        (label :class "no_image ${player.title_class}" :text {player.image == "images/1px.png" || player.image == "/run/user/1000/album_cover.png" ? player.text : ""} )
+        (label
+            :class "no_image ${player.title_class}"
+            :text {player.image == "images/1px.png" || player.image == "/run/user/1000/album_cover.png" ? player.text : ""}
+        )
         (cavastuff)
         ( box :class "button" :halign "start" :orientation "v"
             (label :text {player.status} )
