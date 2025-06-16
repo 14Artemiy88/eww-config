@@ -19,8 +19,32 @@ declare -A icons=(
 # Создаем директорию для изображений, если не существует
 [[ ! -d "$IMG_PATH" ]] && mkdir -p "$IMG_PATH"
 
+is_youtube_video() {
+    local url title
+
+    url=$(playerctl metadata -f '{{xesam:url}}' 2>/dev/null)
+    title=$(playerctl metadata -f '{{xesam:title}}' 2>/dev/null)
+
+    # Проверка по URL
+    [[ "$url" == *"youtube.com/watch?v="* ]] && return 0
+    [[ "$url" == *"youtu.be/"* ]] && return 0
+    [[ "$url" == *"googlevideo.com/"* ]] && return 0
+
+    # Проверка по заголовку (для некоторых плееров)
+    [[ "$title" == *"YouTube"* ]] && return 0
+    [[ "$title" == *"- YouTube" ]] && return 0
+
+    return 1
+}
+
 # Функция для загрузки изображений
 get_image() {
+    # Проверяем, является ли видео YouTube
+    if is_youtube_video; then
+        echo "$DEFAULT_IMG"
+        return
+    fi
+
     local img_url="$1"
 
     # Возвращаем дефолтное изображение, если URL пустой
@@ -135,7 +159,7 @@ get_player_metadata() {
 
     for player in "${players[@]}"; do
         status=$(playerctl -p "$player" status 2>/dev/null)
-#         [[ "$status" != "Playing" ]] && continue
+         [[ "$status" != "Playing" && "$player" == "org.telegram.desktop" ]] && continue
 
         metadata=$(playerctl -p "$player" metadata -f "$params" 2>/dev/null)
         [[ -n "$metadata" ]] && break
@@ -152,6 +176,10 @@ get_player_metadata() {
         *"VK"*)        service="vk";        title=${title/"VK Видео — смотрѣть безплатно"/} ;;
         *"Телемост"*)  get_json "" "" "$DEFAULT_TIMELEFT" "0" "1" "" "$DEFAULT_IMG" "telemost" "$player" "$DEFAULT_TITLE_CLASS"; return ;;
     esac
+
+    if is_youtube_video; then
+        service="youtube";
+    fi
 
     # Экранирование спецсимволов
     title=${title//\\/|}
