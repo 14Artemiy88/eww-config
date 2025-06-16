@@ -135,7 +135,7 @@ get_player_metadata() {
 
     for player in "${players[@]}"; do
         status=$(playerctl -p "$player" status 2>/dev/null)
-        [[ "$status" != "Playing" ]] && continue
+#         [[ "$status" != "Playing" ]] && continue
 
         metadata=$(playerctl -p "$player" metadata -f "$params" 2>/dev/null)
         [[ -n "$metadata" ]] && break
