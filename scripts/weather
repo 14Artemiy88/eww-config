@@ -1,17 +1,36 @@
 #!/bin/bash
 
+declare -r CACHE_DIR="/tmp/weather_cache"
+declare -r CACHE_TTL=600  # 10 минут
+declare -r GISMETEO_TOKEN=$(<token)
+
+# Создаем директорию кэша
+mkdir -p "$CACHE_DIR"
+
 function get_weather() {
-    local -r type="$1"
-    local -r params="$2"
-    local -r gismeteo_token=$(cat token)
+    local cache=$1
+    local type=$2
+    local params=$3
+    local cache_file="$CACHE_DIR/${cache}_${params//[^a-z0-9]/_}.json"
 
-    res=$(curl -H "X-Gismeteo-Token: $gismeteo_token" "https://api.gismeteo.net/v2/weather/$type/4517/$params")
+    # Проверяем актуальность кэша
+    if [[ -f "$cache_file" && $(($(date +%s) - $(stat -c %Y "$cache_file"))) -lt $CACHE_TTL ]]; then
+        cat "$cache_file"
+        return
+    fi
 
-    echo "$res"  | jq .response
+    # Выполняем запрос и кэшируем результат
+    curl -sfS -H "X-Gismeteo-Token: $GISMETEO_TOKEN" \
+         "https://api.gismeteo.net/v2/weather/$type/4517/$params" |
+    jq -c '.response' > "$cache_file"
+
+    cat "$cache_file"
 }
 
-
-if   [[ "$1" == "now" ]];  then get_weather "current" ""
-elif [[ "$1" == "day" ]];  then get_weather "forecast" "?days=2"
-elif [[ "$1" == "week" ]]; then get_weather "forecast/aggregate" "?days=5"
-fi
+# Остальная часть скрипта без изменений
+case $1 in
+    now)  get_weather "now" "current" "" ;;
+    day)  get_weather "day" "forecast" "?days=2" ;;
+    week) get_weather "week" "forecast/aggregate" "?days=5" ;;
+    *)    echo "Usage: $0 {now|day|week}" >&2; exit 1 ;;
+esac
