@@ -5,31 +5,52 @@ declare -r NET_PATH="/run/user/1000/eww_net"
 convert_bytes() {
     local bytes=$1
     local unit="B"
-    if ((bytes >= 1073741824)); then
+    local result=0
+
+    if ((bytes >= 1099511627776)); then
+        unit="TB"
+        result=$((bytes * 10000 / 1099511627776))
+    elif ((bytes >= 1073741824)); then
         unit="GB"
-        bytes=$(bc <<< "scale=2; $bytes / 1073741824")
+        result=$((bytes * 10000 / 1073741824))
     elif ((bytes >= 1048576)); then
         unit="MB"
-        bytes=$(bc <<< "scale=2; $bytes / 1048576")
+        result=$((bytes * 10000 / 1048576))
     elif ((bytes >= 1024)); then
         unit="KB"
-        bytes=$(bc <<< "scale=2; $bytes / 1024")
+        result=$((bytes * 10000 / 1024))
+    else
+        printf "%d %s" "$bytes" "$unit"
+        return
     fi
 
-    echo "$bytes $unit"
+    # Форматируем с двумя знаками после запятой
+    printf "%d.%02d %s" $((result / 10000)) $(((result % 10000)/100)) "$unit"
 }
 
 
-IFS=" "
-up=0
-down=0
+# Читаем предыдущие значения
+prev_up=0
+prev_down=0
 if [[ -f "${NET_PATH}" ]]; then
-    read -r up down < "${NET_PATH}"
+    read -r prev_up prev_down < "${NET_PATH}"
 fi
 
-read -r new_down new_up <<< $(cat /proc/net/dev | awk 'NR==4 {printf "%s %s", $2,$10}')
+# Читаем текущие значения напрямую из /proc/net/dev
+read -r new_down new_up < <(
+    awk 'NR==4 {print $2, $10}' /proc/net/dev
+)
 
+# Рассчитываем разницу
+diff_down=$((new_down - prev_down))
+diff_up=$((new_up - prev_up))
 
-echo "{ \"down\": \"$(convert_bytes ${new_down})\", \"up\": \"$(convert_bytes ${new_up})\", \"speed_down\": \"$(convert_bytes $((new_down - down)))\", \"speed_up\": \"$(convert_bytes $((new_up - up)))\" }"
+# Форматируем вывод
+printf '{"down":"%s", "up":"%s", "speed_down":"%s", "speed_up":"%s"}\n' \
+    "$(convert_bytes "$new_down")" \
+    "$(convert_bytes "$new_up")" \
+    "$(convert_bytes "$diff_down")" \
+    "$(convert_bytes "$diff_up")"
 
+# Сохраняем новые значения
 echo "$new_up $new_down" > "${NET_PATH}"

@@ -1,4 +1,4 @@
-(defpoll weather_now  :interval "29m" "scripts/weather now")
+(defpoll weather_now  :interval "20m" "scripts/weather now")
 (defpoll weather_day  :interval "1h"  "scripts/weather day")
 (defpoll weather_week :interval "1h"  "scripts/weather week")
 (defvar days '["", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]')
@@ -78,7 +78,7 @@
 
 (defwidget temperature [temp class ?tooltip]
     (label :style {
-            temp >= 30 ? "color: #cc0000" :
+            temp >= 30 ? "color: #ff8989" :
             temp >= 20 ? "color: #ffb4bb" :
             temp >= 10 ? "color: #ffe0ba" :
             temp > 0   ? "color: #fce3c4" :
@@ -88,7 +88,7 @@
             temp > -30 ? "color: #3c82e2" :
                          "color: #0000cc"
         }
-        :text "${temp}°"
+        :text {temp >= 30 ? "󰈸 ${temp}°" : "${temp}°"}
         :class class
         :halign "center"
         :valign "end"

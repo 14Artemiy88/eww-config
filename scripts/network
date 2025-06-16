@@ -10,17 +10,25 @@ declare -A icons=(
     ["tun"]="󱠾"
     ["wireguard"]="󰠥"
 )
-str=""
+entries=()
 while IFS=':' read -r name type device; do
-    if [[ $type = "tun" || $type = "bridge" ]]; then continue; fi
-    dev="on"
-    if [[ $device = "" ]]; then dev="off"; fi
-    line="{ \"name\": \"$name\", \"type\": \"${icons[$type]}\", \"status\": \"$dev\" }"
-    if [[ $str = "" ]]; then
-        str="$line"
-    else
-        str="$str,$line"
-    fi
-done <<< "$(nmcli -g NAME,TYPE,DEVICE c)"
+    [[ $type == @(tun|bridge|loopback) ]] && continue
 
-echo "[$str]"
+    if [[ -z $device ]]; then
+        status="off"
+    else
+        status="on"
+    fi
+
+    # Используем иконку по умолчанию если тип не найден
+    icon="${icons[$type]:-}"
+
+    # Формируем JSON-объект
+    printf -v entry '{"name":"%s","type":"%s","status":"%s"}' \
+        "$name" "$icon" "$status"
+    entries+=("$entry")
+done < <(nmcli -g NAME,TYPE,DEVICE c 2>/dev/null)
+
+# Формируем итоговый JSON
+IFS=','
+printf "[%s]\n" "${entries[*]}"

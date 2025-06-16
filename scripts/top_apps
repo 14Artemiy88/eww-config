@@ -1,19 +1,52 @@
 #!/bin/bash
 
-# top -> press f -> toggle columns -> W (shift_w) to save
-readarray -t mem_lines <<< "$(top -b -o +SHR | head -n 12 | tail -5)"
-readarray -t cpu_lines <<< "$(top -b -o +%CPU | head -n 12 | tail -5)"
+# Функция для генерации JSON с использованием ps
+generate_json() {
+    local metric=$1
+    local json=""
+    local awk_script
 
-IFS=' '
-mem_json=""
-cpu_json=""
-for i in {0..4} ; do
-    read -r mem_value _ mem_name <<< "${mem_lines[$i]}"
-    read -r _ cpu_value cpu_name <<< "${cpu_lines[$i]}"
-    mem_value=$(echo "$mem_value" | sed -e 's/g/ Gb/g' -e 's/m/ Mb/g' -e 's/k/ Kb/g')
-    mem_json+="{\"name\":\"$mem_name\",\"value\":\"$mem_value\"},"
-    cpu_json+="{\"name\":\"$cpu_name\",\"value\":\"$cpu_value\"},"
-done
+    if [[ $metric == "mem" ]]; then
+        # Для памяти используем RSS (resident set size)
+        awk_script='
+            BEGIN {count=0}
+            $2 > 0 {  # Игнорируем процессы с нулевым использованием
+                if (++count > 5) exit
+                # Преобразуем килобайты в читаемый формат
+                value = $2
+                if (value >= 1000000) {
+                    value = sprintf("%.1f Gb", value / 1000000)
+                } else if (value >= 1000) {
+                    value = sprintf("%.1f Mb", value / 1000)
+                } else {
+                    value = value " Kb"
+                }
+                printf "%s|%s|%s\n", value, $3, $1
+            }'
 
-#echo -e "$str"
-echo -e "{\"cpu\":[${cpu_json%,*}],\"mem\":[${mem_json%,*}]}"
+        data=$(ps -eo pid,rss,comm --sort=-rss --no-headers | awk "$awk_script")
+    else
+        # Для CPU используем %CPU
+        awk_script='
+            BEGIN {count=0}
+            $2 > 0 {  # Игнорируем процессы с нулевым использованием
+                if (++count > 5) exit
+                printf "%s%%|%s|%s\n", $2, $3, $1
+            }'
+        data=$(ps -eo pid,pcpu,comm --sort=-pcpu --no-headers | awk "$awk_script")
+    fi
+
+    # Формируем JSON
+    while IFS='|' read -r value name pid; do
+        json+="{\"name\":\"$name\",\"value\":\"$value\",\"pid\":\"$pid\"},"
+    done <<< "$data"
+
+    echo "${json%,}"
+}
+
+# Запуск в параллельных подпроцессах
+cpu_json=$(generate_json cpu)
+mem_json=$(generate_json mem)
+
+# Формирование итогового JSON
+echo "{\"cpu\":[${cpu_json}],\"mem\":[${mem_json}]}"

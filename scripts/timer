@@ -1,40 +1,71 @@
 #!/bin/bash
 
-function timer() {
-    local now
-    now=$(date '+%s')
-    local timer_json=""
-    for file in /run/user/1000/timer/*; do
-        if [ -f $file ]; then
-            local time
-            time=$(cat $file)
-            (( timer = time - now ))
-            timer=$(date -u --date='@'"$timer" '+%H:%M:%S')
-            timer=${timer##00:}
-            timer_json+="{\"file\":\"$file\",\"timer\":\"$timer\"},"
+TIMER_DIR="/run/user/1000/timer"
+
+timer() {
+    local now=$(date '+%s')
+    local timers=()
+
+    for file in "$TIMER_DIR"/*; do
+        [[ -f "$file" ]] || continue
+
+        local end_time
+        read -r end_time < "$file"
+        local seconds_left=$((end_time - now))
+
+        if (( seconds_left <= 0 )); then
+            rm -f "$file"
+            continue
         fi
+
+        # Форматирование времени без вызова date
+        local hours=$((seconds_left / 3600))
+        local minutes=$(( (seconds_left % 3600) / 60 ))
+        local seconds=$((seconds_left % 60))
+
+        # Форматирование в HH:MM:SS
+        local timer_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+        timer_str=${timer_str##00:} # Удаляем ведущие 00:
+
+        timers+=("{\"file\":\"$file\",\"timer\":\"$timer_str\"}")
     done
-    echo -e "[${timer_json%,*}]"
-}
 
-function timer_up () {
-    echo "$(($(cat "$1") + 60))" >"$1"
-}
-function timer_down () {
-    newTime=$(($(cat "$1") - 60))
-    if [ $newTime -lt "$(date '+%s')" ]; then
-        rm "$1"
-        return
+    # Формируем JSON через jq для безопасности
+    if (( ${#timers[@]} > 0 )); then
+        printf '%s\n' "${timers[@]}" | jq -s .
+    else
+        echo '[]'
     fi
-    echo "$newTime" >"$1"
-}
-function timer_pause () {
-    rm "$1"
 }
 
-if   [[ "$1" == "up" ]];     then timer_up "$2"
-elif [[ "$1" == "down" ]];   then timer_down "$2"
-elif [[ "$1" == "delete" ]]; then timer_pause "$2"
-fi
+timer_up() {
+    local file="$1"
+    [[ -f "$file" ]] || return
 
-timer
+    local current_time
+    read -r current_time < "$file"
+    echo $((current_time + 60)) > "$file"
+}
+
+timer_down() {
+    local file="$1"
+    [[ -f "$file" ]] || return
+
+    local current_time
+    read -r current_time < "$file"
+    local new_time=$((current_time - 60))
+
+    (( new_time > $(date '+%s') )) && echo "$new_time" > "$file" || rm -f "$file"
+}
+
+timer_delete() {
+    rm -f "$1"
+}
+
+# Главная логика
+case "$1" in
+    up)      timer_up "$2" ;;
+    down)    timer_down "$2" ;;
+    delete)  timer_delete "$2" ;;
+    *)       timer ;;
+esac

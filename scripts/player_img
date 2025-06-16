@@ -7,4 +7,3 @@ if [ ! -d IMG_PATH ]; then
 fi
 
 ffmpeg -ss "$1" -loglevel 0 -y -i "${IMG_PATH}/img.png" "$2"
-echo 312
