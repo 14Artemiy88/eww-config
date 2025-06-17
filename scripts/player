@@ -39,12 +39,6 @@ is_youtube_video() {
 
 # Функция для загрузки изображений
 get_image() {
-    # Проверяем, является ли видео YouTube
-    if is_youtube_video; then
-        echo "$DEFAULT_IMG"
-        return
-    fi
-
     local img_url="$1"
 
     # Возвращаем дефолтное изображение, если URL пустой
@@ -152,6 +146,8 @@ get_mpv_player_metadata() {
 
 # Получение метаданных через playerctl
 get_player_metadata() {
+    local image="$DEFAULT_IMG"
+    local service="$DEFAULT_TEXT"
     local s="💩" # разделитель
     local params="{{ title }}${s}{{ artist }}${s}{{ position }}${s}{{ mpris:length }}${s}-{{ duration(mpris:length - position) }}${s}{{ mpris:artUrl }}"
     local players=("org.telegram.desktop" "plasma-browser-integration")
@@ -159,7 +155,7 @@ get_player_metadata() {
 
     for player in "${players[@]}"; do
         status=$(playerctl -p "$player" status 2>/dev/null)
-         [[ "$status" != "Playing" && "$player" == "org.telegram.desktop" ]] && continue
+        [[ "$status" != "Playing" && "$player" == "org.telegram.desktop" ]] && continue
 
         metadata=$(playerctl -p "$player" metadata -f "$params" 2>/dev/null)
         [[ -n "$metadata" ]] && break
@@ -168,17 +164,17 @@ get_player_metadata() {
 
     IFS="$s" read -r title artist position len timeleft img <<< "$metadata"
 
-    # Обработка сервисов
-    local service=""
     case "$title" in
         *"Кинопоиск"*) service="kinopoisk"; title=${title/" — смотреть онлайн в хорошем качестве — Кинопоиск"/} ;;
         *"Twitch"*)    service="twitch";    title=${title/" - Twitch"/} ;;
         *"VK"*)        service="vk";        title=${title/"VK Видео — смотрѣть безплатно"/} ;;
-        *"Телемост"*)  get_json "" "" "$DEFAULT_TIMELEFT" "0" "1" "" "$DEFAULT_IMG" "telemost" "$player" "$DEFAULT_TITLE_CLASS"; return ;;
+        *"Телемост"*)  get_json "" "" "$DEFAULT_TIMELEFT" "$DEFAULT_POSITION" "$DEFAULT_LENGTH" "" "$DEFAULT_IMG" "telemost" "$player" "$DEFAULT_TITLE_CLASS"; return ;;
     esac
 
     if is_youtube_video; then
         service="youtube";
+    else
+        image=$(get_image "$img")
     fi
 
     # Экранирование спецсимволов
@@ -187,9 +183,9 @@ get_player_metadata() {
 
     # Формируем JSON
     if [[ -n "$position" ]]; then
-        get_json "$title" "$artist" "$timeleft" "$position" "$len" "${icons[$status]}" "$(get_image "$img")" "${service:-$DEFAULT_TEXT}" "$player" "$DEFAULT_TITLE_CLASS"
+        get_json "$title" "$artist" "$timeleft" "$position" "$len" "${icons[$status]}" "$image" "$service" "$player" "$DEFAULT_TITLE_CLASS"
     else
-        get_json "$title" "" "$DEFAULT_TIMELEFT" "$DEFAULT_POSITION" "$DEFAULT_LENGTH" "" "$DEFAULT_IMG" "${service:-$DEFAULT_TEXT}" "$player" "$DEFAULT_TITLE_CLASS"
+        get_json "$title" "" "$DEFAULT_TIMELEFT" "$DEFAULT_POSITION" "$DEFAULT_LENGTH" "" "$image" "$service" "$player" "$DEFAULT_TITLE_CLASS"
     fi
 }
 
@@ -220,4 +216,4 @@ get_mpv_player_metadata
 get_player_metadata
 
 # Если ничего не играет
-get_json "" "" "$DEFAULT_TIMELEFT" "0" "1" "" "$DEFAULT_IMG" "silence" "" "$DEFAULT_TITLE_CLASS"
+get_json "" "" "$DEFAULT_TIMELEFT" "$DEFAULT_POSITION" "$DEFAULT_LENGTH" "" "$DEFAULT_IMG" "silence" "" "$DEFAULT_TITLE_CLASS"

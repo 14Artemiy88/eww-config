@@ -24,7 +24,7 @@
         (image
             :class "weather_icon"
             :valign "start"
-            :width 100
+            :width 80
             :path "images/gismeteo/new_png/${weather.icon}.png"
             :tooltip {weather.description.full}
         )
