@@ -1,0 +1,35 @@
+// Calendar
+.cal {
+  background-color: $background;
+  border: $border;
+  border-radius: $br;
+  padding: 5px;
+  font-family: LED, Ubuntu, serif;
+  font-size: 20px;
+  font-weight: normal;
+}
+
+calender {
+    color: #fff;
+}
+calendar:selected {
+  color: #00cccc;
+}
+
+calendar.header {
+  color: #ccc;
+  font-weight: bold;
+}
+
+calendar.button {
+  color: #fff;
+}
+
+calendar.highlight {
+  color: #ccc;
+  font-weight: bold;
+}
+
+calendar:indeterminate {
+  color: #777;
+}

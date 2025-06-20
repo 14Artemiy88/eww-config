@@ -114,22 +114,23 @@ get_mopidy_player_metadata() {
 
 # Получение метаданных MPV
 get_mpv_player_metadata() {
-    local mpvsocket="/run/user/1000/mpvsocket"
+    local mpvsocket mpv_data title position duration path remaining timeleft
+    mpvsocket="/run/user/1000/mpvsocket"
     [[ ! -S "$mpvsocket" ]] && return
 
     # Получаем данные за один запрос
-    local mpv_data=$(socat - "$mpvsocket" <<< $'{"command": ["get_property_string", "media-title"], "request_id": 1}\n{"command": ["get_property", "time-pos"], "request_id": 2}\n{"command": ["get_property", "duration"], "request_id": 3}\n{"command": ["get_property", "path"], "request_id": 4}')
+    mpv_data=$(socat - "$mpvsocket" <<< $'{"command": ["get_property_string", "media-title"], "request_id": 1}\n{"command": ["get_property", "time-pos"], "request_id": 2}\n{"command": ["get_property", "duration"], "request_id": 3}\n{"command": ["get_property", "path"], "request_id": 4}')
 
-    local title=$(jq -r 'select(.request_id == 1) | .data' <<< "$mpv_data")
-    local position=$(jq -r 'select(.request_id == 2) | .data' <<< "$mpv_data")
-    local duration=$(jq -r 'select(.request_id == 3) | .data' <<< "$mpv_data")
-    local path=$(jq -r 'select(.request_id == 4) | .data' <<< "$mpv_data")
+    title=$(jq -r 'select(.request_id == 1) | .data' <<< "$mpv_data")
+    position=$(jq -r 'select(.request_id == 2) | .data' <<< "$mpv_data")
+    duration=$(jq -r 'select(.request_id == 3) | .data' <<< "$mpv_data")
+    path=$(jq -r 'select(.request_id == 4) | .data' <<< "$mpv_data")
 
     [[ -z "$position" || "$position" == "null" ]] && return
 
     # Рассчитываем оставшееся время
-    local remaining=$(awk -v d="$duration" -v p="$position" 'BEGIN {printf "%.0f", d - p}')
-    local timeleft=$(date -u -d @"$remaining" +'%H:%M:%S')
+    remaining=$(awk -v d="$duration" -v p="$position" 'BEGIN {printf "%.0f", d - p}')
+    timeleft=$(date -u -d @"$remaining" +'%H:%M:%S')
     timeleft=${timeleft##00:}
 
     # Генерируем путь к изображению

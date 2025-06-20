@@ -93,21 +93,27 @@
 )
 
 
+(defwindow calendar
+    :monitor "LCD195VXM+"
+    :geometry ( geometry :x "331" :y "70" :anchor "top left" )
+
+    (revealer
+        :transition "crossfade"
+        :reveal {show_calendar}
+        :duration "350ms"
+
+        (cal)
+    )
+)
+
+
+
 ( defwindow volumes
     :monitor "LCD195VXM+"
     :geometry ( geometry :x "331" :y "72" :anchor "top left" )
     :stacking "bg"
 
     (volumestuff)
-)
-
-
-( defwindow networks
-    :monitor "LCD195VXM+"
-    :geometry ( geometry :x "331" :y "570" :anchor "top left" )
-    :stacking "bg"
-
-    (networkstuff)
 )
 
 
@@ -118,3 +124,13 @@
 
     (playerstuff)
 )
+
+
+( defwindow networks
+    :monitor "LCD195VXM+"
+    :geometry ( geometry :x "331" :y "575" :anchor "top left" )
+    :stacking "bg"
+
+    (networkstuff)
+)
+

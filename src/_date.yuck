@@ -1,4 +1,7 @@
-(defpoll dayname :interval "1s" `date +%A` )
+(defpoll dayname       :interval "1s" `date +%A` )
+(defpoll calendar_day  :interval "20h" "date '+%d'")
+(defpoll calendar_year :interval "20h" "date '+%Y'")
+(defvar  show_calendar false)
 
 (defwidget datestuff []
     (box
@@ -13,14 +16,33 @@
 )
 
 (defwidget rightdate []
-  (
-    box
+  (box
       :class "rightdate"
       :orientation "v"
       :space-evenly false
       :halign "end"
 
-        (box :class "date" :halign "end" {formattime(EWW_TIME, "%d.%m.%Y")} )
+        (button
+            :class "date"
+            :halign "end"
+            :onclick "eww update show_calendar=${!show_calendar};"
+            {formattime(EWW_TIME, "%d.%m.%Y")}
+        )
         (box :class "day"  :halign "end" dayname )
   )
+)
+
+
+(defwidget cal []
+	(box
+	    :class "calendar"
+	    :orientation "h"
+
+        (calendar
+            :class "cal"
+            :day calendar_day
+            :year calendar_year
+        )
+
+    )
 )

@@ -1,5 +1,5 @@
 (defpoll timer :interval "1s" `scripts/timer`)
-(defvar timers '["5", "9", "15"]')
+(defvar timers '["5", "10", "15"]')
 (defvar show_set_timers false)
 (defvar show_set_custom_timer1 false)
 (defvar show_set_custom_timer2 false)
@@ -75,87 +75,33 @@
        :halign "start"
        :spacing 10
 
-        (timer_button_1)
-        (timer_button_2)
-        (timer_button_3)
+        (timer_button :id 1 :value custom_timer1 :visible show_set_custom_timer1)
+        (timer_button :id 2 :value custom_timer2 :visible show_set_custom_timer2)
+        (timer_button :id 3 :value custom_timer3 :visible show_set_custom_timer3)
     )
 )
 
-(defwidget timer_button_1 []
+(defwidget timer_button [id value visible]
     (box
         :class "set_custom_timer_box"
         :space-evenly true
-         :valign "start"
+        :valign "start"
 
         (eventbox
             :class "set_timer"
-            :onclick "timer ${custom_timer1}"
-            :onrightclick "eww update show_set_custom_timer1=true;"
-            :onscroll {
-                "eww update scroll={}; eww update custom_timer1=${scroll == 'up' ? custom_timer1 + 1 : custom_timer1 - 1};"
-            }
-            :onmiddleclick "eww update custom_timer1=${timers[0]};"
-            :visible {!show_set_custom_timer1}
-            (label :text "${custom_timer1}" )
+            :onclick "timer ${value} -s"
+            :onrightclick "eww update show_set_custom_timer${id}=true;"
+            :onscroll "eww update scroll={}; eww update custom_timer${id}=${scroll == 'up' ? value + 1 : value - 1}"
+            :onmiddleclick "eww update custom_timer${id}=${timers[id - 1]};"
+            :visible {!visible}
+            (label :text "${value}" )
         )
         (input
             :class "set_custom_timer"
-            :value "${custom_timer1}"
-            :onchange "eww update custom_timer1={}"
-            :onaccept "eww update custom_timer1={}; eww update show_set_custom_timer1=false; timer {}"
-            :visible {show_set_custom_timer1}
-        )
-    )
-)
-(defwidget timer_button_2 []
-    (box
-        :class "set_custom_timer_box"
-        :space-evenly true
-         :valign "start"
-
-        (eventbox
-            :class "set_timer"
-            :onclick "timer ${custom_timer2}"
-            :onrightclick "eww update show_set_custom_timer2=true;"
-            :onscroll {
-                "eww update scroll={}; eww update custom_timer2=${scroll == 'up' ? custom_timer2 + 1 : custom_timer2 - 1};"
-            }
-            :onmiddleclick "eww update custom_timer2=${timers[1]};"
-            :visible {!show_set_custom_timer2}
-            (label :text "${custom_timer2}" )
-        )
-        (input
-            :class "set_custom_timer"
-            :value "${custom_timer2}"
-            :onchange "eww update custom_timer2={}"
-            :onaccept "eww update custom_timer2={}; eww update show_set_custom_timer2=false; timer {}"
-            :visible {show_set_custom_timer2}
-        )
-    )
-)
-(defwidget timer_button_3 []
-    (box
-        :class "set_custom_timer_box"
-        :space-evenly true
-         :valign "start"
-
-        (eventbox
-            :class "set_timer"
-            :onclick "timer ${custom_timer3}"
-            :onrightclick "eww update show_set_custom_timer3=true;"
-            :onscroll {
-                "eww update scroll={}; eww update custom_timer3=${scroll == 'up' ? custom_timer3 + 1 : custom_timer3 - 1};"
-            }
-            :onmiddleclick "eww update custom_timer3=${timers[2]};"
-            :visible {!show_set_custom_timer3}
-            (label :text "${custom_timer3}" )
-        )
-        (input
-            :class "set_custom_timer"
-            :value "${custom_timer3}"
-            :onchange "eww update custom_timer3={}"
-            :onaccept "eww update custom_timer3={}; eww update show_set_custom_timer3=false; timer {}"
-            :visible {show_set_custom_timer3}
+            :value "${value}"
+            :onchange "eww update value={}"
+            :onaccept "eww update value={}; eww update show_set_custom_timer${id}=false; timer {} -s"
+            :visible {visible}
         )
     )
 )
