@@ -95,10 +95,10 @@
 
 (defwindow calendar
     :monitor "LCD195VXM+"
-    :geometry ( geometry :x "331" :y "70" :anchor "top left" )
+    :geometry ( geometry :anchor "top left" :x "5" :y "65" :width "315" :height "0" )
 
     (revealer
-        :transition "crossfade"
+        :transition "slideup"
         :reveal {show_calendar}
         :duration "350ms"
 
