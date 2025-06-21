@@ -269,11 +269,9 @@ get_deadbeef_player_metadata() {
         return
     fi
 
-      status="Playing"
-    # выходим если пауза
-    if ! deadbeef --nowplaying-tf "%ispaused%" >/dev/null; then
-      status="Paused"
-    fi
+    # Получаем статус воспроизведения
+    local status="Playing"
+    [[ $(deadbeef --nowplaying-tf "%ispaused%") == "1" ]] && status="Paused"
 
     # Получаем метаданные трека
     local title

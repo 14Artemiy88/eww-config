@@ -7,6 +7,7 @@ declare -A PLAYER_COMMANDS=(
     ["org.telegram.desktop"]="playerctl -p \"%s\" play-pause"
     ["plasma-browser-integration"]="playerctl -p %s play-pause"
     ["mopidy"]="mopidy playpauseexit 0"
+    ['deadbeef']="deadbeef --toggle-pause"
 )
 
 # Функция для получения свойств MPV за один вызов
@@ -45,7 +46,7 @@ pause() {
             create_image "$title" "$path" "$position"
             eval "${PLAYER_COMMANDS[mpv]}"
             ;;
-        org.telegram.desktop|plasma-browser-integration|mopidy)
+        *)
             eval "$(printf "${PLAYER_COMMANDS[$1]}" "$1")"
             ;;
     esac
