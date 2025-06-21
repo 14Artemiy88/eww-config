@@ -143,6 +143,10 @@ timeFormat() {
 
 # Получение метаданных Mopidy
 get_mopidy_player_metadata() {
+    if ! pgrep -x mopidy >/dev/null; then
+        return
+    fi
+
     local status_json rpc_data current trackTime current_album current_album_date current_artist current_length current_title
     local format_album time_left cls
 
@@ -186,8 +190,11 @@ get_mopidy_player_metadata() {
 
 # Получение метаданных MPV
 get_mpv_player_metadata() {
-    local mpvsocket
-    mpvsocket="/run/user/1000/mpvsocket"
+    if ! pgrep -x mpv >/dev/null; then
+        return
+    fi
+
+    local mpvsocket="/run/user/1000/mpvsocket"
     [[ ! -S "$mpvsocket" ]] && return
 
     local mpv_data title position duration path remaining timeleft
