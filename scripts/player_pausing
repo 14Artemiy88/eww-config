@@ -1,7 +1,8 @@
 #!/bin/bash
 
 declare -r MPV_SOCKET="/run/user/1000/mpvsocket"
-declare -r IMG_PATH="$HOME/.cache/eww"
+declare -r IMG_PATH="/run/user/1000/eww_player"
+declare -r IMG_SUFFIX=".png"
 declare -A PLAYER_COMMANDS=(
     ["mpv"]='echo "{ \"command\": [\"cycle\", \"pause\"] }" | socat - "$MPV_SOCKET"'
     ["org.telegram.desktop"]="playerctl -p \"%s\" play-pause"
@@ -25,10 +26,10 @@ create_image() {
     local title="$1"
     local path="$2"
     local position="$3"
-    local image_path="$IMG_PATH/$title.png"
+    local image_path="$IMG_PATH/$title$IMG_SUFFIX"
 
-    [[ ! -f "$image_path" ]] && \
-        ffmpeg -ss "$position" -i "$path" -vframes 1 -y "$image_path" 2>/dev/null
+    rm -f "$image_path" 2>/dev/null
+    ffmpeg -ss "$position" -i "$path" -vframes 1 -y "$image_path" 2>/dev/null
 }
 
 # Основная функция паузы

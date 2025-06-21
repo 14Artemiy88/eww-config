@@ -186,10 +186,11 @@ get_mopidy_player_metadata() {
 
 # Получение метаданных MPV
 get_mpv_player_metadata() {
-    local mpvsocket mpv_data title position duration path remaining timeleft
+    local mpvsocket
     mpvsocket="/run/user/1000/mpvsocket"
     [[ ! -S "$mpvsocket" ]] && return
 
+    local mpv_data title position duration path remaining timeleft
     # Получаем данные за один запрос
     mpv_data=$(socat - "$mpvsocket" <<< $'{"command": ["get_property_string", "media-title"], "request_id": 1}\n{"command": ["get_property", "time-pos"], "request_id": 2}\n{"command": ["get_property", "duration"], "request_id": 3}\n{"command": ["get_property", "path"], "request_id": 4}')
 
@@ -205,12 +206,14 @@ get_mpv_player_metadata() {
     timeleft=$(date -u -d @"$remaining" +'%H:%M:%S')
     timeleft=${timeleft##00:}
 
+    title="${title//\"/}"
+
     # Генерируем путь к изображению
     local image_path="$IMG_PATH/${title}${IMG_SUFFIX}"
 
     # Создаем превью каждую минуту
-      if [[ ! -f "$image_path" || "$(find "$image_path" -mmin +1)" ]]; then
-        ffmpeg -ss "$(date -u -d @"$position" +'%H:%M:%S')" -loglevel 0 -y -i "$path" "$image_path"
+    if [[ ! -f "$image_path" || "$(find "$image_path" -mmin +1)" ]]; then
+        ffmpeg -ss "$position" -i "$path" -vframes 1 -y "$image_path" 2>/dev/null
     fi
     [[ -f "$image_path" ]] || image_path="$DEFAULT_IMG"
 
