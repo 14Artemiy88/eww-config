@@ -16,17 +16,89 @@ declare -A icons=(
     ["paused"]=""
 )
 
+# Основная функция поиска обложки
+declare -A cover_cache  # Кэш путей к обложкам
+
+find_cover() {
+    local album_dir="$1"
+
+    # Быстрый поиск через предопределенные пути
+    local -a candidates=(
+        # Стандартные имена файлов
+        "$album_dir/cover.jpg" "$album_dir/folder.jpg" "$album_dir/artwork.jpg" "$album_dir/front.jpg"
+        "$album_dir/cover.png" "$album_dir/folder.png" "$album_dir/artwork.png" "$album_dir/front.png"
+        "$album_dir/cover.jpeg" "$album_dir/folder.jpeg" "$album_dir/artwork.jpeg" "$album_dir/front.jpeg"
+
+        # Альтернативные имена и регистры
+        "$album_dir/Cover.jpg" "$album_dir/Folder.jpg" "$album_dir/Artwork.jpg" "$album_dir/Front.jpg"
+        "$album_dir/AlbumArt.jpg" "$album_dir/Album.jpg" "$album_dir/Image.jpg"
+    )
+
+    # Проверка существования файлов без циклов
+    for art in "${candidates[@]}"; do
+        [[ -f "$art" ]] && { echo "$art"; return 0; }
+    done
+
+    # Углубленный поиск с оптимизированными условиями
+    find "$album_dir" -maxdepth 2 -type f \( \
+        -iname "*cover*.jp*" -o \
+        -iname "*cover*.png" -o \
+        -iname "*folder*.jp*" -o \
+        -iname "*folder*.png" -o \
+        -iname "*artwork*.jp*" -o \
+        -iname "*artwork*.png" -o \
+        -iname "*front*.jp*" -o \
+        -iname "*front*.png" \) \
+        -print -quit
+}
+
+# Основной поток с улучшенной логикой кэширования
+get_album_img() {
+    local file="$1"
+    local album_dir="${file%/*}"
+
+    # Используем кэшированное значение если доступно
+    if [[ -v cover_cache["$album_dir"] ]]; then
+        echo "${cover_cache["$album_dir"]}"
+        return
+    fi
+
+    # Для нелокальных треков - дефолтная обложка
+    if [[ ! -f "$file" ]]; then
+        cover_cache["$album_dir"]="$DEFAULT_IMG"
+        echo "$DEFAULT_IMG"
+        return
+    fi
+
+    # Ищем обложку
+    local art
+    art=$(find_cover "$album_dir")
+
+    # Кэшируем результат
+    if [[ -f "$art" ]]; then
+        cover_cache["$album_dir"]="$art"
+        echo "$art"
+    else
+        cover_cache["$album_dir"]="$DEFAULT_IMG"
+        echo "$DEFAULT_IMG"
+    fi
+}
+
+#copy and resize image to destination
+ffmpeg -loglevel 0 -y -i "$art" -vf "scale=$COVER_SIZE:-1" "$COVER"
+
+
 # Создаем директорию для изображений, если не существует
 [[ ! -d "$IMG_PATH" ]] && mkdir -p "$IMG_PATH"
 
 is_youtube_video() {
     local url title
 
-    url=$(playerctl metadata -f '{{xesam:url}}' 2>/dev/null)
-    title=$(playerctl metadata -f '{{xesam:title}}' 2>/dev/null)
+    url=$(playerctl -p plasma-browser-integration metadata -f '{{xesam:url}}' 2>/dev/null)
+    title=$(playerctl -p plasma-browser-integration metadata -f '{{xesam:title}}' 2>/dev/null)
 
     # Проверка по URL
-    [[ "$url" == *"youtube.com/watch?v="* ]] && return 0
+    [[ "$url" == *"youtube.com/"* ]] && return 0
     [[ "$url" == *"youtu.be/"* ]] && return 0
     [[ "$url" == *"googlevideo.com/"* ]] && return 0
 
@@ -190,6 +262,45 @@ get_player_metadata() {
     fi
 }
 
+# Функция для получения метаданных DeadBeeF
+get_deadbeef_player_metadata() {
+    # Проверяем, запущен ли DeadBeeF
+    if ! pgrep -x deadbeef-main >/dev/null; then
+        return
+    fi
+
+      status="Playing"
+    # выходим если пауза
+    if ! deadbeef --nowplaying-tf "%ispaused%" >/dev/null; then
+      status="Paused"
+    fi
+
+    # Получаем метаданные трека
+    local title
+    title=$(deadbeef --nowplaying "%t" 2>/dev/null)
+
+    if [[ "$title" == "nothing" ]]; then
+      return
+    fi
+
+    local artist duration position timeleft file_path image_path
+    artist=$(deadbeef --nowplaying "%a" 2>/dev/null)
+    duration=$(deadbeef --nowplaying-tf "%length_seconds%" 2>/dev/null)
+    position=$(deadbeef --nowplaying-tf "%playback_time_seconds%" 2>/dev/null)
+    timeleft=$(deadbeef --nowplaying-tf "-%playback_time_remaining%" 2>/dev/null)
+    file_path=$(deadbeef --nowplaying-tf "%path%" 2>/dev/null)
+
+    # Пытаемся извлечь обложку
+    if [[ -f "$file_path" ]]; then
+        image_path=$(get_album_img "$file_path")
+    fi
+
+    # Формируем JSON
+    pos_ms=$(awk "BEGIN {printf \"%.0f\", $position * 1000}")
+    dur_ms=$(awk "BEGIN {printf \"%.0f\", $duration * 1000}")
+    get_json "$title" "$artist" "$timeleft" "$pos_ms" "$dur_ms" "${icons[$status]}" "$image_path" "$artist" "deadbeef" "$DEFAULT_TITLE_CLASS"
+}
+
 # Формирование JSON
 get_json() {
     local position_percent=0
@@ -212,7 +323,8 @@ EOF
 }
 
 # Основной поток выполнения
-get_mopidy_player_metadata
+#get_mopidy_player_metadata
+get_deadbeef_player_metadata
 get_mpv_player_metadata
 get_player_metadata
 
