@@ -208,9 +208,9 @@ get_mpv_player_metadata() {
     # Генерируем путь к изображению
     local image_path="$IMG_PATH/${title}${IMG_SUFFIX}"
 
-    # Создаем превью только если его нет
-    if [[ ! -f "$image_path" ]]; then
-        ffmpeg -ss "$position" -i "$path" -vframes 1 -y "$image_path" 2>/dev/null
+    # Создаем превью каждую минуту
+      if [[ ! -f "$image_path" || "$(find "$image_path" -mmin +1)" ]]; then
+        ffmpeg -ss "$(date -u -d @"$position" +'%H:%M:%S')" -loglevel 0 -y -i "$path" "$image_path"
     fi
     [[ -f "$image_path" ]] || image_path="$DEFAULT_IMG"
 
