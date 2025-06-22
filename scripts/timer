@@ -1,6 +1,7 @@
 #!/bin/bash
 
 TIMER_DIR="/run/user/1000/timer"
+MESSAGE="динь-динь"
 
 timer() {
     local now=$(date '+%s')
@@ -15,6 +16,10 @@ timer() {
 
         if (( seconds_left <= 0 )); then
             rm -f "$file"
+
+            say "$MESSAGE"
+            kdialog --imgbox ~/Images/D/100-1/50.jpg --title "$MESSAGE" &>/dev/null &
+
             continue
         fi
 
@@ -60,6 +65,11 @@ timer_down() {
 
 timer_delete() {
     rm -f "$1"
+}
+
+# Функция синтеза речи
+say() {
+    [[ -n "$1" ]] && echo "$1" | festival --tts --language russian &>/dev/null
 }
 
 # Главная логика

@@ -89,7 +89,7 @@
 
         (eventbox
             :class "set_timer"
-            :onclick "timer ${value} -s"
+            :onclick "date -d '+${value} min' +%s > /run/user/1000/timer/${EWW_TIME}"
             :onrightclick "eww update show_set_custom_timer${id}=true;"
             :onscroll "eww update scroll={}; eww update custom_timer${id}=${scroll == 'up' ? value + 1 : value - 1}"
             :onmiddleclick "eww update custom_timer${id}=${timers[id - 1]};"
@@ -100,7 +100,7 @@
             :class "set_custom_timer"
             :value "${value}"
             :onchange "eww update value={}"
-            :onaccept "eww update value={}; eww update show_set_custom_timer${id}=false; timer {} -s"
+            :onaccept "eww update value={}; eww update show_set_custom_timer${id}=false; date -d '+{} min' +%s > /run/user/1000/timer/${EWW_TIME}"
             :visible {visible}
         )
     )

@@ -1,4 +1,4 @@
-(deflisten values :initial "0,0,0,0,0,0,0,0,0,0,0,0,0,0" `scripts/cava`)
+;; (deflisten values :initial "0,0,0,0,0,0,0,0,0,0,0,0,0,0" `scripts/cava`)
 (defpoll player :interval "1s" "scripts/player")
 
 (defwidget playerstuff []
@@ -17,7 +17,7 @@
             :class "no_image ${player.title_class}"
             :text {player.image == "images/1px.png" || player.image == "/run/user/1000/album_cover.png" ? player.text : ""}
         )
-        (cavastuff)
+ ;;       (cavastuff)
         ( box :class "button" :halign "start" :orientation "v"
             (label :text {player.status} )
         )
@@ -36,16 +36,16 @@
 
 
 
-(defwidget cavastuff []
-    (box
-        :class "cava"
-        :orientation "h"
-
-        (for val in "${search(values, '[0-9]+')}"
-           (box
-               :class "bar"
-               :style "margin-top: ${100-val}px;"
-           )
-        )
-    )
-)
+;; (defwidget cavastuff []
+;;     (box
+;;         :class "cava"
+;;         :orientation "h"
+;;
+;;         (for val in "${search(values, '[0-9]+')}"
+;;            (box
+;;                :class "bar"
+;;                :style "margin-top: ${100-val}px;"
+;;            )
+;;         )
+;;     )
+;; )
