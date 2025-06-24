@@ -4,7 +4,8 @@ TIMER_DIR="/run/user/1000/timer"
 MESSAGE="динь-динь"
 
 timer() {
-    local now=$(date '+%s')
+    local now
+    now=$(date '+%s')
     local timers=()
 
     for file in "$TIMER_DIR"/*; do
@@ -29,7 +30,8 @@ timer() {
         local seconds=$((seconds_left % 60))
 
         # Форматирование в HH:MM:SS
-        local timer_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+        local timer_str
+        timer_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
         timer_str=${timer_str##00:} # Удаляем ведущие 00:
 
         timers+=("{\"file\":\"$file\",\"timer\":\"$timer_str\"}")
@@ -71,6 +73,9 @@ timer_delete() {
 say() {
     [[ -n "$1" ]] && echo "$1" | festival --tts --language russian &>/dev/null
 }
+
+# Создаем директорию для изображений, если не существует
+[[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
 
 # Главная логика
 case "$1" in
