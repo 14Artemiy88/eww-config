@@ -85,7 +85,7 @@
 
         (eventbox
             :class "set_timer"
-            :onclick "date -d '+${value} min' +%s > /run/user/1000/timer/${EWW_TIME}"
+            :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer add '${value}'"
             :onscroll "eww update scroll={}; eww update custom_timer${id}=${scroll == 'up' ? value + 1 : value - 1}"
             :onmiddleclick "eww update custom_timer${id}=${default_timers[id - 1]};"
             (label :text "${value}" )

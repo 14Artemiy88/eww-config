@@ -69,16 +69,22 @@ timer_delete() {
     rm -f "$1"
 }
 
+timer_add() {
+  # Создаем директорию для  таймеров, если не существует
+  [[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
+
+  date -d "+$1 min" +%s > "$TIMER_DIR/$(date '+%s')"
+}
+
 # Функция синтеза речи
 say() {
     [[ -n "$1" ]] && echo "$1" | festival --tts --language russian &>/dev/null
 }
 
-# Создаем директорию для изображений, если не существует
-[[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
 
 # Главная логика
 case "$1" in
+    add)     timer_add "$2";;
     up)      timer_up "$2" ;;
     down)    timer_down "$2" ;;
     delete)  timer_delete "$2" ;;
