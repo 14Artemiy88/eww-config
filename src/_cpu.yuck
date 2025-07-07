@@ -6,16 +6,16 @@
         :orientation "v"
         :space-evenly false
         :halign "start"
-        (metric :class "CPU1" :label " " :value {EWW_CPU.cores[0].usage}  )
-        (metric :class "CPU2" :label " " :value {EWW_CPU.cores[1].usage}  )
-        (metric :class "CPU3" :label " " :value {EWW_CPU.cores[2].usage}  )
-        (metric :class "CPU4" :label " " :value {EWW_CPU.cores[3].usage}  )
-        (metric :class "CPU5" :label " " :value {EWW_CPU.cores[4].usage}  )
-        (metric :class "CPU6" :label " " :value {EWW_CPU.cores[5].usage}  )
-        (metric :class "CPU7" :label " " :value {EWW_CPU.cores[6].usage}  )
-        (metric :class "CPU8" :label " " :value {EWW_CPU.cores[7].usage}  )
-        (metric :class "RAM"  :label " " :value {EWW_RAM.used_mem_perc}   )
-        (metric :class "GPU"  :label "󰡀 " :value getgpu                    )
+        (metric :class "cpustuffBar CPU1" :label " " :value {EWW_CPU.cores[0].usage}  )
+        (metric :class "cpustuffBar CPU2" :label " " :value {EWW_CPU.cores[1].usage}  )
+        (metric :class "cpustuffBar CPU3" :label " " :value {EWW_CPU.cores[2].usage}  )
+        (metric :class "cpustuffBar CPU4" :label " " :value {EWW_CPU.cores[3].usage}  )
+        (metric :class "cpustuffBar CPU5" :label " " :value {EWW_CPU.cores[4].usage}  )
+        (metric :class "cpustuffBar CPU6" :label " " :value {EWW_CPU.cores[5].usage}  )
+        (metric :class "cpustuffBar CPU7" :label " " :value {EWW_CPU.cores[6].usage}  )
+        (metric :class "cpustuffBar CPU8" :label " " :value {EWW_CPU.cores[7].usage}  )
+        (metric :class "cpustuffBar RAM"  :label " " :value {EWW_RAM.used_mem_perc}   )
+        (metric :class "cpustuffBar GPU"  :label "󰡀 " :value getgpu                    )
     )
 )
 

@@ -1,23 +1,18 @@
 .networkstatstuff {
-  padding: 5px;
-  font-size: 13px;
   min-width: 303px;
+  padding: 5px;
   margin: 5px 0 0;
+  font-size: 13px;
 
   .totalup, .totaldown {
     margin-right: 5px;
   }
-  .totalup {
-    color: #baffc9;
-  }
-  .totaldown {
-    color: #ffb4bb;
-  }
-  .icon {
-    margin-left: 10px;
-    font-size: 16px;
-  }
 
-  .label {
+  .totalup { color: #baffc9 }
+  .totaldown { color: #ffb4bb }
+
+  .icon {
+    font-size: 16px;
+    margin-left: 10px;
   }
 }

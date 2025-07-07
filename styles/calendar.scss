@@ -1,27 +1,26 @@
-// Calendar
 .cal {
   background-color: $background;
   border: $border;
   border-radius: $br;
   padding: 5px;
-  font: normal 20px LED, Ubuntu, serif;
-}
+  font: normal 1.56rem LED, "Ubuntu", system-ui, sans-serif;
 
-calendar,
-calendar.button {
-  color: #fff;
-}
+  calendar {
+    &, &.button {
+      color: #fff;
+    }
 
-calendar:selected {
-  color: #00cccc;
-}
+    &:selected {
+      color: #00cccc;
+    }
 
-calendar.header,
-calendar.highlight {
-  color: #ccc;
-  font-weight: bold;
-}
+    &.header, &.highlight {
+      color: #ccc;
+      font-weight: bold;
+    }
 
-calendar:indeterminate {
-  color: #777;
+    &:indeterminate {
+      color: #777;
+    }
+  }
 }
