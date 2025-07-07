@@ -1,4 +1,4 @@
-;; (defpoll getgpu :interval "1s" "scripts/getgpu || echo 0")
+ (defpoll getgpu :interval "1s" "scripts/getgpu || echo 0")
 
 (defwidget cpustuff []
     (box
@@ -6,16 +6,16 @@
         :orientation "v"
         :space-evenly false
         :halign "start"
-        (metric :label " " :value {EWW_CPU.cores[0].usage} :class "CPU1" )
-        (metric :label " " :value {EWW_CPU.cores[1].usage} :class "CPU2" )
-        (metric :label " " :value {EWW_CPU.cores[2].usage} :class "CPU3" )
-        (metric :label " " :value {EWW_CPU.cores[3].usage} :class "CPU4" )
-        (metric :label " " :value {EWW_CPU.cores[4].usage} :class "CPU5" )
-        (metric :label " " :value {EWW_CPU.cores[5].usage} :class "CPU6" )
-        (metric :label " " :value {EWW_CPU.cores[6].usage} :class "CPU7" )
-        (metric :label " " :value {EWW_CPU.cores[7].usage} :class "CPU8" )
-        (metric :label " " :value {EWW_RAM.used_mem_perc}  :class "RAM"  )
-      ;;  (metric :label "GPU " :value getgpu                   :class "GPU"  )
+        (metric :class "CPU1" :label " " :value {EWW_CPU.cores[0].usage}  )
+        (metric :class "CPU2" :label " " :value {EWW_CPU.cores[1].usage}  )
+        (metric :class "CPU3" :label " " :value {EWW_CPU.cores[2].usage}  )
+        (metric :class "CPU4" :label " " :value {EWW_CPU.cores[3].usage}  )
+        (metric :class "CPU5" :label " " :value {EWW_CPU.cores[4].usage}  )
+        (metric :class "CPU6" :label " " :value {EWW_CPU.cores[5].usage}  )
+        (metric :class "CPU7" :label " " :value {EWW_CPU.cores[6].usage}  )
+        (metric :class "CPU8" :label " " :value {EWW_CPU.cores[7].usage}  )
+        (metric :class "RAM"  :label " " :value {EWW_RAM.used_mem_perc}   )
+        (metric :class "GPU"  :label "󰡀 " :value getgpu                    )
     )
 )
 

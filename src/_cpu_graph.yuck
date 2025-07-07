@@ -6,7 +6,7 @@
         :orientation "v"
         :space-evenly false
         :halign "start"
-       ;; :width 313
+        :width 313
        (cpu_graph :flipped true)
        (cpu_graph :flipped false)
     )

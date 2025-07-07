@@ -30,11 +30,11 @@ timer() {
         local seconds=$((seconds_left % 60))
 
         # Форматирование в HH:MM:SS
-        local timer_str
+        local timer_str color
         timer_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
         timer_str=${timer_str##00:} # Удаляем ведущие 00:
-
-        timers+=("{\"file\":\"$file\",\"timer\":\"$timer_str\"}")
+        color="#$(printf '%s' "$file" | md5sum | cut -c1-6)"
+        timers+=("{\"file\":\"$file\", \"timer\":\"$timer_str\", \"color\":\"$color\"}")
     done
 
     # Формируем JSON через jq для безопасности

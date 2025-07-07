@@ -4,27 +4,19 @@
   border: $border;
   border-radius: $br;
   padding: 5px;
-  font-family: LED, Ubuntu, serif;
-  font-size: 20px;
-  font-weight: normal;
+  font: normal 20px LED, Ubuntu, serif;
 }
 
-calender {
-    color: #fff;
-}
-calendar:selected {
-  color: #00cccc;
-}
-
-calendar.header {
-  color: #ccc;
-  font-weight: bold;
-}
-
+calendar,
 calendar.button {
   color: #fff;
 }
 
+calendar:selected {
+  color: #00cccc;
+}
+
+calendar.header,
 calendar.highlight {
   color: #ccc;
   font-weight: bold;

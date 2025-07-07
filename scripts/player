@@ -40,15 +40,20 @@ find_cover() {
     done
 
     # Углубленный поиск с оптимизированными условиями
+#    find "$album_dir" -maxdepth 2 -type f \( \
+#        -iname "*cover*.jp*" -o \
+#        -iname "*cover*.png" -o \
+#        -iname "*folder*.jp*" -o \
+#        -iname "*folder*.png" -o \
+#        -iname "*artwork*.jp*" -o \
+#        -iname "*artwork*.png" -o \
+#        -iname "*front*.jp*" -o \
+#        -iname "*front*.png" \) \
+#        -print -quit
+
     find "$album_dir" -maxdepth 2 -type f \( \
-        -iname "*cover*.jp*" -o \
-        -iname "*cover*.png" -o \
-        -iname "*folder*.jp*" -o \
-        -iname "*folder*.png" -o \
-        -iname "*artwork*.jp*" -o \
-        -iname "*artwork*.png" -o \
-        -iname "*front*.jp*" -o \
-        -iname "*front*.png" \) \
+        -iname "*.jp*" -o \
+        -iname "*.png" \) \
         -print -quit
 }
 
