@@ -1,30 +1,22 @@
 #!/bin/bash
 
-# Окончательная версия скрипта для получения информации о громкостях
+# Скрипт для получения информации о громкостях
 data=$(pactl list sink-inputs | awk '
     BEGIN {
-        num = ""; state = "нет"; vol = ""; name = ""
+        num = ""; vol = ""; name = ""
     }
 
     /Вход аудиоприёмника №[0-9]+/ {
         if (num != "") {
-            if (state != "нет") {
-                print num
-                print vol
-                print name
-            }
+            print num
+            print vol
+            print name
         }
         # Извлекаем номер потока
         num = $0
         sub(/.*№/, "", num)
-        state = "нет"
         vol = ""
         name = ""
-    }
-
-    /Поток данных приостановлен:/ {
-        # Берем последнее поле (да/нет)
-        state = $NF
     }
 
     /Громкость:/ {
@@ -47,7 +39,7 @@ data=$(pactl list sink-inputs | awk '
     }
 
     END {
-        if (num != "" && state != "нет") {
+        if (num != "") {
             print num
             print vol
             print name
@@ -64,7 +56,7 @@ fi
 # Читаем данные в массив
 readarray -t array <<< "$data"
 
-# Формируем JSON (теперь по 3 элемента на поток)
+# Формируем JSON (3 элемента на поток)
 json_items=()
 for ((i=0; i<${#array[@]}; i+=3)); do
     num="${array[i]}"
@@ -78,7 +70,7 @@ for ((i=0; i<${#array[@]}; i+=3)); do
     name="${name//\\/\\\\}"
     name="${name//\"/\\\"}"
 
-    # Формируем JSON элемент без состояния
+    # Формируем JSON элемент
     json_items+=("{\"num\":\"$num\",\"value\":\"$vol\",\"name\":\"$name\"}")
 done
 
