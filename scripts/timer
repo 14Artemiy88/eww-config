@@ -8,7 +8,7 @@ timer() {
     now=$(date '+%s')
     local timers=()
 
-    for file in "$TIMER_DIR"/*; do
+    for file in $(ls -1tr "$TIMER_DIR"/*); do
         [[ -f "$file" ]] || continue
 
         local end_time
@@ -33,7 +33,8 @@ timer() {
         local timer_str color
         timer_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
         timer_str=${timer_str##00:} # Удаляем ведущие 00:
-        color="#$(printf '%s' "$file" | md5sum | cut -c1-6)"
+#        color="#$(printf '%s' "$file" | md5sum | cut -c1-6)"
+        color="#$(basename "$file")"
         timers+=("{\"file\":\"$file\", \"timer\":\"$timer_str\", \"color\":\"$color\"}")
     done
 
@@ -73,7 +74,8 @@ timer_add() {
   # Создаем директорию для  таймеров, если не существует
   [[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
 
-  date -d "+$1 min" +%s > "$TIMER_DIR/$(date '+%s')"
+#  date -d "+$1 min" +%s > "$TIMER_DIR/$(date '+%s')"
+  date -d "+$1 min" +%s > "$TIMER_DIR/$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)"
 }
 
 # Функция синтеза речи
@@ -81,12 +83,16 @@ say() {
     [[ -n "$1" ]] && echo "$1" | festival --tts --language russian &>/dev/null
 }
 
+update_color() {
+  mv "$1" "$TIMER_DIR/$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)"
+}
 
 # Главная логика
 case "$1" in
-    add)     timer_add "$2";;
-    up)      timer_up "$2" ;;
-    down)    timer_down "$2" ;;
-    delete)  timer_delete "$2" ;;
-    *)       timer ;;
+    add)          timer_add "$2";;
+    up)           timer_up "$2" ;;
+    down)         timer_down "$2" ;;
+    delete)       timer_delete "$2" ;;
+    update_color) update_color "$2" ;;
+    *)            timer ;;
 esac

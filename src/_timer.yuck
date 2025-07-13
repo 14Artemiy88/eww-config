@@ -23,7 +23,7 @@
             (for time in {timer}
                 (eventbox
                     :onscroll "bash ${EWW_CONFIG_DIR}/scripts/timer {} '${time.file}'"
-                    :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer up '${time.file}'"
+                    :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer update_color '${time.file}'"
                     :onrightclick "bash ${EWW_CONFIG_DIR}/scripts/timer down '${time.file}'"
                     :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}'"
                     (label :halign "end" :class "timer" :text "${time.timer}" :style "color: ${time.color};" )

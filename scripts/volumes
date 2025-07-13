@@ -1,32 +1,98 @@
 #!/bin/bash
 
-# Получаем данные и обрабатываем их более эффективно
-readarray -t array <<< "$(pactl list sink-inputs | awk -F'"' '
-    /№/ {num=$2; next}
-    /Громкость:/ {sub(/.* ([0-9]+)%.*/, "\\1", $0); vol=$1; next}
-    /media.name/ {name=$2; print num; print vol; print name}
-')"
+# Окончательная версия скрипта для получения информации о громкостях
+data=$(pactl list sink-inputs | awk '
+    BEGIN {
+        num = ""; state = "нет"; vol = ""; name = ""
+    }
 
-if [[ -z "${array[*]}" ]]; then
+    /Вход аудиоприёмника №[0-9]+/ {
+        if (num != "") {
+            if (state != "нет") {
+                print num
+                print vol
+                print name
+            }
+        }
+        # Извлекаем номер потока
+        num = $0
+        sub(/.*№/, "", num)
+        state = "нет"
+        vol = ""
+        name = ""
+    }
+
+    /Поток данных приостановлен:/ {
+        # Берем последнее поле (да/нет)
+        state = $NF
+    }
+
+    /Громкость:/ {
+        # Ищем процентное значение
+        split($0, parts, " ")
+        for (i in parts) {
+            if (parts[i] ~ /[0-9]+%/) {
+                vol = parts[i]
+                sub(/%/, "", vol)
+                break
+            }
+        }
+    }
+
+    /media.name =/ {
+        # Извлекаем имя приложения
+        name = $0
+        sub(/.*media.name = "/, "", name)
+        sub(/".*/, "", name)
+    }
+
+    END {
+        if (num != "" && state != "нет") {
+            print num
+            print vol
+            print name
+        }
+    }
+')
+
+# Если данных нет, возвращаем пустой массив
+if [[ -z "$data" ]]; then
     echo "[]"
     exit 0
 fi
 
-json_items=()
-for ((j=0; j<${#array[@]}; j+=3)); do
-    name="${array[j+2]}"
-    [[ "$name" == "playback" ]] && continue
+# Читаем данные в массив
+readarray -t array <<< "$data"
 
-    # Обработка имени
-    name="${name//\\/|}"
+# Формируем JSON (теперь по 3 элемента на поток)
+json_items=()
+for ((i=0; i<${#array[@]}; i+=3)); do
+    num="${array[i]}"
+    vol="${array[i+1]}"
+    name="${array[i+2]}"
+
+    # Пропускаем неполные записи
+    [[ -z "$num" || -z "$vol" || -z "$name" ]] && continue
+
+    # Экранирование спецсимволов
+    name="${name//\\/\\\\}"
     name="${name//\"/\\\"}"
 
-    # Попытка преобразования кодировки
-    if name_buf=$(iconv -t latin1 <<< "$name" 2>/dev/null); then
-        name=$(iconv -f cp1251 <<< "$name_buf" 2>/dev/null || echo "$name")
-    fi
-
-    printf -v subjson '{"num": "%d", "value": "%d", "name": "%s"}' \
-        "${array[j]}" "${array[j+1]}" "$name"
-    json_items+=("$subjson")
+    # Формируем JSON элемент без состояния
+    json_items+=("{\"num\":\"$num\",\"value\":\"$vol\",\"name\":\"$name\"}")
 done
+
+# Вывод результата
+if [[ ${#json_items[@]} -gt 0 ]]; then
+    echo "["
+    for ((i=0; i<${#json_items[@]}; i++)); do
+        if [[ $i -lt $((${#json_items[@]} - 1)) ]]; then
+            echo "    ${json_items[$i]},"
+        else
+            echo "    ${json_items[$i]}"
+        fi
+    done
+    echo "]"
+else
+    echo "[]"
+fi
