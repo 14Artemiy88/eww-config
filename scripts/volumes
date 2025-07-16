@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# Скрипт для получения информации о громкостях
+# Финальная версия скрипта для получения информации о громкостях
 data=$(pactl list sink-inputs | awk '
     BEGIN {
-        num = ""; vol = ""; name = ""
+        num = ""; vol = ""; name = ""; reset_flag = 0
     }
 
     /Вход аудиоприёмника №[0-9]+/ {
-        if (num != "") {
+        # Если есть предыдущие данные - выводим
+        if (num != "" && vol != "" && name != "") {
             print num
             print vol
             print name
@@ -15,31 +16,38 @@ data=$(pactl list sink-inputs | awk '
         # Извлекаем номер потока
         num = $0
         sub(/.*№/, "", num)
+        # Сбрасываем остальные переменные
         vol = ""
         name = ""
+        reset_flag = 1
     }
 
     /Громкость:/ {
-        # Ищем процентное значение
-        split($0, parts, " ")
-        for (i in parts) {
-            if (parts[i] ~ /[0-9]+%/) {
-                vol = parts[i]
-                sub(/%/, "", vol)
-                break
+        if (reset_flag) {
+            # Ищем процентное значение
+            split($0, parts, " ")
+            for (i in parts) {
+                if (parts[i] ~ /[0-9]+%/) {
+                    vol = parts[i]
+                    sub(/%/, "", vol)
+                    break
+                }
             }
         }
     }
 
     /media.name =/ {
-        # Извлекаем имя приложения
-        name = $0
-        sub(/.*media.name = "/, "", name)
-        sub(/".*/, "", name)
+        if (reset_flag) {
+            # Извлекаем имя приложения
+            name = $0
+            sub(/.*media.name = "/, "", name)
+            sub(/".*/, "", name)
+            reset_flag = 0
+        }
     }
 
     END {
-        if (num != "") {
+        if (num != "" && vol != "" && name != "") {
             print num
             print vol
             print name
@@ -56,7 +64,7 @@ fi
 # Читаем данные в массив
 readarray -t array <<< "$data"
 
-# Формируем JSON (3 элемента на поток)
+# Формируем JSON
 json_items=()
 for ((i=0; i<${#array[@]}; i+=3)); do
     num="${array[i]}"

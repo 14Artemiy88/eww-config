@@ -57,32 +57,32 @@ find_cover() {
         -print -quit
 }
 
-# Основной поток с улучшенной логикой кэширования
+# Основная функция с экранированием для CSS
 get_album_img() {
     local file="$1"
     local album_dir="${file%/*}"
 
-    # Используем кэшированное значение если доступно
     if [[ -v cover_cache["$album_dir"] ]]; then
         echo "${cover_cache["$album_dir"]}"
         return
     fi
 
-    # Для нелокальных треков - дефолтная обложка
     if [[ ! -f "$file" ]]; then
         cover_cache["$album_dir"]="$DEFAULT_IMG"
         echo "$DEFAULT_IMG"
         return
     fi
 
-    # Ищем обложку
     local art
     art=$(find_cover "$album_dir")
 
-    # Кэшируем результат
     if [[ -f "$art" ]]; then
-        cover_cache["$album_dir"]="$art"
-        echo "$art"
+        # Экранирование с использованием подстановки в bash
+        local art_css="${art//\\/\\\\}"  # Заменяем \ на \\
+        art_css="${art_css//\'/\\\'}"   # Заменяем ' на \'
+
+        cover_cache["$album_dir"]="$art_css"
+        echo "$art_css"
     else
         cover_cache["$album_dir"]="$DEFAULT_IMG"
         echo "$DEFAULT_IMG"
