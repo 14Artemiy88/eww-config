@@ -21,71 +21,121 @@ declare -A cover_cache  # Кэш путей к обложкам
 
 find_cover() {
     local album_dir="$1"
+    local parent_dir
+
+    # Определяем родительский каталог
+    parent_dir=$(dirname "$album_dir")
 
     # Быстрый поиск через предопределенные пути
     local -a candidates=(
         # Стандартные имена файлов
-        "$album_dir/cover.jpg" "$album_dir/folder.jpg" "$album_dir/artwork.jpg" "$album_dir/front.jpg"
-        "$album_dir/cover.png" "$album_dir/folder.png" "$album_dir/artwork.png" "$album_dir/front.png"
-        "$album_dir/cover.jpeg" "$album_dir/folder.jpeg" "$album_dir/artwork.jpeg" "$album_dir/front.jpeg"
+        "cover.jpg" "folder.jpg" "artwork.jpg" "front.jpg"
+        "cover.png" "folder.png" "artwork.png" "front.png"
+        "cover.jpeg" "folder.jpeg" "artwork.jpeg" "front.jpeg"
+        "cover.bmp" "folder.bmp" "artwork.bmp" "front.bmp"
 
         # Альтернативные имена и регистры
-        "$album_dir/Cover.jpg" "$album_dir/Folder.jpg" "$album_dir/Artwork.jpg" "$album_dir/Front.jpg"
-        "$album_dir/AlbumArt.jpg" "$album_dir/Album.jpg" "$album_dir/Image.jpg"
+        "Cover.jpg" "Folder.jpg" "Artwork.jpg" "Front.jpg"
+        "AlbumArt.jpg" "Album.jpg" "Image.jpg"
     )
 
-    # Проверка существования файлов без циклов
-    for art in "${candidates[@]}"; do
+    # Проверка в текущем каталоге
+    for name in "${candidates[@]}"; do
+        local art="$album_dir/$name"
         [[ -f "$art" ]] && { echo "$art"; return 0; }
     done
 
-    # Углубленный поиск с оптимизированными условиями
-#    find "$album_dir" -maxdepth 2 -type f \( \
-#        -iname "*cover*.jp*" -o \
-#        -iname "*cover*.png" -o \
-#        -iname "*folder*.jp*" -o \
-#        -iname "*folder*.png" -o \
-#        -iname "*artwork*.jp*" -o \
-#        -iname "*artwork*.png" -o \
-#        -iname "*front*.jp*" -o \
-#        -iname "*front*.png" \) \
-#        -print -quit
+    # Проверка в родительском каталоге
+    for name in "${candidates[@]}"; do
+        local art="$parent_dir/$name"
+        [[ -f "$art" ]] && { echo "$art"; return 0; }
+    done
 
-    find "$album_dir" -maxdepth 2 -type f \( \
+    # Углубленный поиск в текущем каталоге
+    local found_art
+    found_art=$(find "$album_dir" -maxdepth 2 -type f \( \
         -iname "*.jp*" -o \
-        -iname "*.png" \) \
-        -print -quit
+        -iname "*.png" -o \
+        -iname "*.bmp" \) \
+        -print -quit 2>/dev/null)
+
+    if [[ -n "$found_art" ]]; then
+        echo "$found_art"
+        return 0
+    fi
+
+    # Углубленный поиск в родительском каталоге
+    found_art=$(find "$parent_dir" -maxdepth 2 -type f \( \
+        -iname "*.jp*" -o \
+        -iname "*.png" -o \
+        -iname "*.bmp" \) \
+        -print -quit 2>/dev/null)
+
+    if [[ -n "$found_art" ]]; then
+        echo "$found_art"
+        return 0
+    fi
+
+    # Ничего не найдено
+    return 1
 }
 
-# Основная функция с экранированием для CSS
+# Оптимизированная функция экранирования
+escape_path() {
+    local path="$1"
+    # Одним проходом обрабатываем все спецсимволы
+    local result=""
+    local i=0
+    while (( i < ${#path} )); do
+        local char="${path:i:1}"
+        case "$char" in
+            \\ | \' | \")
+                result+="\\\\$char"
+                ;;
+            *)
+                result+="$char"
+                ;;
+        esac
+        ((i++))
+    done
+    echo -n "$result"
+}
+
+# Основная функция
 get_album_img() {
     local file="$1"
     local album_dir="${file%/*}"
 
+    # Используем кэшированное значение если доступно
     if [[ -v cover_cache["$album_dir"] ]]; then
         echo "${cover_cache["$album_dir"]}"
         return
     fi
 
+    # Для нелокальных треков - дефолтная обложка
     if [[ ! -f "$file" ]]; then
-        cover_cache["$album_dir"]="$DEFAULT_IMG"
-        echo "$DEFAULT_IMG"
+        local default_escaped
+        default_escaped=$(escape_path "$DEFAULT_IMG")
+        cover_cache["$album_dir"]="$default_escaped"
+        echo "$default_escaped"
         return
     fi
 
+    # Ищем обложку
     local art
     art=$(find_cover "$album_dir")
 
+    # Кэшируем результат
     if [[ -f "$art" ]]; then
-        # Экранирование с использованием подстановки в bash
-        local art_css="${art//\\/\\\\}"  # Заменяем \ на \\
-        art_css="${art_css//\'/\\\'}"   # Заменяем ' на \'
-
-        cover_cache["$album_dir"]="$art_css"
-        echo "$art_css"
+        local art_escaped
+        art_escaped=$(escape_path "$art")
+        cover_cache["$album_dir"]="$art_escaped"
+        echo "$art_escaped"
     else
-        cover_cache["$album_dir"]="$DEFAULT_IMG"
-        echo "$DEFAULT_IMG"
+        local default_escaped
+        default_escaped=$(escape_path "$DEFAULT_IMG")
+        cover_cache["$album_dir"]="$default_escaped"
+        echo "$default_escaped"
     fi
 }
 
