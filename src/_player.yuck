@@ -22,8 +22,9 @@
             (label :text {player.status} )
         )
         ( label :class "time"   :halign "end"   :text {player.timeleft}  )
-        ( label :class "artist" :halign "start" :text {player.artist} :limit-width 60 )
-        ( label :class "title"  :halign "start" :text {player.title}  :limit-width 60 )
+        ( label :class "third_line" :halign "start" :text {player.third_line} :limit-width 60 )
+        ( label :class "second_line" :halign "start" :text {player.second_line} :limit-width 60 )
+        ( label :class "first_line"  :halign "start" :text {player.first_line}  :limit-width 60 )
         (scale
            :class "progress"
            :min 0

@@ -4,9 +4,6 @@ declare -r IMG_PATH="/run/user/1000/eww_player"
 declare -r IMG_SUFFIX=".png"
 declare -r DEFAULT_IMG="images/1px.png"
 declare -r DEFAULT_TEXT="no image"
-declare -r DEFAULT_LENGTH=1
-declare -r DEFAULT_POSITION=0
-declare -r DEFAULT_TIMELEFT=" "
 declare -r DEFAULT_TITLE_CLASS="default"
 
 declare -A icons=(
@@ -240,7 +237,17 @@ get_mopidy_player_metadata() {
     [[ ${#current_title} -gt 10 ]] && cls="more_ten"
 
     # Формируем JSON
-    get_json "$current_title" "$format_album" "$time_left" "$trackTime" "$current_length" "${icons[playing]}" "/run/user/1000/album_cover.png" "$current_artist" "mopidy" "$cls"
+    get_json \
+        --first_line "$current_title" \
+        --second_line "$format_album" \
+        --timeleft "$time_left" \
+        --pos_ms "$trackTime" \
+        --dur_ms "$$current_lengthlen" \
+        --status "${icons[playing]}" \
+        --image "/run/user/1000/album_cover.png" \
+        --artist "$current_artist" \
+        --player "mopidy" \
+        --title_class "$cls"
 }
 
 # Получение метаданных MPV
@@ -279,7 +286,14 @@ get_mpv_player_metadata() {
     fi
     [[ -f "$image_path" ]] || image_path="$DEFAULT_IMG"
 
-    get_json "$title" "" "$timeleft" "$position" "$duration" "" "$image_path" "$DEFAULT_TEXT" "mpv" "$DEFAULT_TITLE_CLASS"
+    get_json \
+        --first_line "$title" \
+        --timeleft "$timeleft" \
+        --pos_ms "$position" \
+        --dur_ms "$duration" \
+        --image "$image_path" \
+        --artist "$DEFAULT_TEXT" \
+        --player "mpv"
 }
 
 # Получение метаданных через playerctl
@@ -306,7 +320,12 @@ get_player_metadata() {
         *"Кинопоиск"*) service="kinopoisk"; title=${title/" — смотреть онлайн в хорошем качестве — Кинопоиск"/} ;;
         *"Twitch"*)    service="twitch";    title=${title/" - Twitch"/} ;;
         *"VK"*)        service="vk";        title=${title/"VK Видео — смотрѣть безплатно"/} ;;
-        *"Телемост"*)  get_json "" "" "$DEFAULT_TIMELEFT" "$DEFAULT_POSITION" "$DEFAULT_LENGTH" "" "$DEFAULT_IMG" "telemost" "$player" "$DEFAULT_TITLE_CLASS"; return ;;
+        *"Телемост"*)
+            get_json \
+                --image "$DEFAULT_IMG" \
+                --artist "telemost" \
+                --player "$player"
+            return ;;
     esac
 
     if is_youtube_video; then
@@ -321,9 +340,23 @@ get_player_metadata() {
 
     # Формируем JSON
     if [[ -n "$position" ]]; then
-        get_json "$title" "$artist" "$timeleft" "$position" "$len" "${icons[$status]}" "$image" "$service" "$player" "$DEFAULT_TITLE_CLASS"
+        get_json \
+            --first_line "$title" \
+            --second_line "$artist" \
+            --timeleft "$timeleft" \
+            --pos_ms "$position" \
+            --dur_ms "$len" \
+            --status "${icons[$status]}" \
+            --image "$image" \
+            --artist "$service" \
+            --player "$player"
     else
-        get_json "$title" "" "$DEFAULT_TIMELEFT" "$DEFAULT_POSITION" "$DEFAULT_LENGTH" "" "$image" "$service" "$player" "$DEFAULT_TITLE_CLASS"
+        get_json \
+            --first_line "$title" \
+            --timeleft "$timeleft" \
+            --image "$image" \
+            --artist "$service" \
+            --player "$player"
     fi
 }
 
@@ -346,42 +379,86 @@ get_deadbeef_player_metadata() {
       return
     fi
 
-    local artist duration position timeleft file_path image_path
-    artist=$(deadbeef --nowplaying "%a" 2>/dev/null)
-    duration=$(deadbeef --nowplaying-tf "%length_seconds%" 2>/dev/null)
-    position=$(deadbeef --nowplaying-tf "%playback_time_seconds%" 2>/dev/null)
-    timeleft=$(deadbeef --nowplaying-tf "-%playback_time_remaining%" 2>/dev/null)
-    file_path=$(deadbeef --nowplaying-tf "%path%" 2>/dev/null)
+    local titleMetadata infoMetadata linesTitle artist duration position timeleft file_path image_path
+    titleMetadata=$(deadbeef --nowplaying "%a\n%y - %b" 2>/dev/null)
+    readarray -t linesTitle <<< "$(echo -e "${titleMetadata//\\\\n/\\n}")"
+
+    infoMetadata=$(deadbeef --nowplaying-tf "%length_seconds%💩%playback_time_seconds%💩-%playback_time_remaining%💩%path%💩" 2>/dev/null)
+    IFS=$'💩' read -r -d '' duration position timeleft file_path _ <<< "$(echo -e "$infoMetadata")"
 
     # Пытаемся извлечь обложку
     if [[ -f "$file_path" ]]; then
         image_path=$(get_album_img "$file_path")
     fi
 
-    # Формируем JSON
-    pos_ms=$(awk "BEGIN {printf \"%.0f\", $position * 1000}")
-    dur_ms=$(awk "BEGIN {printf \"%.0f\", $duration * 1000}")
-    get_json "$title" "$artist" "$timeleft" "$pos_ms" "$dur_ms" "${icons[$status]}" "$image_path" "$artist" "deadbeef" "$DEFAULT_TITLE_CLASS"
+    get_json \
+        --first_line "$title" \
+        --second_line "${linesTitle[1]}" \
+        --third_line "${linesTitle[0]}" \
+        --timeleft "$timeleft" \
+        --pos_ms "$(awk "BEGIN {printf \"%.0f\", $position * 1000}")" \
+        --dur_ms "$(awk "BEGIN {printf \"%.0f\", $duration * 1000}")" \
+        --status "${icons[$status]}" \
+        --image "$image_path" \
+        --artist "${linesTitle[0]}" \
+        --player "deadbeef"
 }
 
 # Формирование JSON
 get_json() {
-    local position_percent=0
-    [[ $5 -ne 0 ]] && position_percent=$(($4 * 100 / $5))
+    # Параметры по умолчанию
+    local first_line second_line third_line timeleft pos_ms dur_ms status image artist player title_class
 
-    cat <<EOF
-{
-  "title": "$1",
-  "artist": "$2",
-  "timeleft": "$3",
-  "position": "$position_percent",
-  "status": "$6",
-  "image": "$7",
-  "text": "$8",
-  "player": "$9",
-  "title_class": "${10}"
-}
-EOF
+    title_class="$DEFAULT_TITLE_CLASS"
+    # Парсинг аргументов
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --first_line) first_line="$2"; shift 2 ;;
+            --second_line) second_line="$2"; shift 2 ;;
+            --third_line) third_line="$2"; shift 2 ;;
+            --timeleft) timeleft="$2"; shift 2 ;;
+            --pos_ms) pos_ms="$2"; shift 2 ;;
+            --dur_ms) dur_ms="$2"; shift 2 ;;
+            --status) status="$2"; shift 2 ;;
+            --image) image="$2"; shift 2 ;;
+            --artist) artist="$2"; shift 2 ;;
+            --player) player="$2"; shift 2 ;;
+            --title_class) title_class="$2"; shift 2 ;;
+            *) shift ;; # игнорируем неизвестные параметры
+        esac
+    done
+
+    # Рассчет позиции в процентах
+    local position_percent=0
+    if [[ $dur_ms -gt 0 ]]; then
+        position_percent=$(( (pos_ms * 100) / dur_ms ))
+    fi
+
+    # Безопасная генерация JSON с помощью jq
+    jq -n \
+        --arg first_line "$first_line" \
+        --arg second_line "$second_line" \
+        --arg third_line "$third_line" \
+        --arg timeleft "$timeleft" \
+        --arg position "$position_percent" \
+        --arg status "$status" \
+        --arg image "$image" \
+        --arg text "$artist" \
+        --arg player "$player" \
+        --arg title_class "$title_class" \
+        '{
+            first_line: $first_line,
+            second_line: $second_line,
+            third_line: $third_line,
+            timeleft: $timeleft,
+            position: $position,
+            status: $status,
+            image: $image,
+            text: $text,
+            player: $player,
+            title_class: $title_class
+        }'
+
     exit 0
 }
 
@@ -392,4 +469,4 @@ get_mpv_player_metadata
 get_player_metadata
 
 # Если ничего не играет
-get_json "" "" "$DEFAULT_TIMELEFT" "$DEFAULT_POSITION" "$DEFAULT_LENGTH" "" "$DEFAULT_IMG" "silence" "" "$DEFAULT_TITLE_CLASS"
+get_json --image "$DEFAULT_IMG" --artist "silence"

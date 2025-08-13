@@ -14,7 +14,7 @@ $font: "Ubuntu Mono Nerd Font";
                   #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000
   );
 
-  .no_image, .button, .time, .artist, .title {
+  .no_image, .button, .time, .second_line, .first_line, .third_line {
     text-shadow: $textShadow;
     padding: 0;
   }
@@ -36,13 +36,14 @@ $font: "Ubuntu Mono Nerd Font";
     margin: -295px 10px 0 0;
   }
 
-  .artist, .title {
+  .second_line, .first_line, .third_line {
     font-family: $font;
     margin-left: 5px;
   }
 
-  .artist { margin: -72px 0 0 5px }
-  .title { margin: -40px 0 0 5px }
+  .third_line { font-weight: 600; margin: -105px 0 0 3px }
+  .second_line { margin: -72px 0 0 5px }
+  .first_line { margin: -38px 0 0 5px }
 
   .progress {
     margin: 0;

@@ -58,7 +58,7 @@
                 :reveal {show_set_timers}
                 :duration "550ms"
 
-              (timer_buttons)
+                (timer_buttons)
             )
         )
 	)
@@ -66,10 +66,10 @@
 
 (defwidget timer_buttons []
     (box :class "timer_buttons"
-       :orientation "h"
-       :space-evenly true
-       :halign "start"
-       :spacing 10
+         :orientation "h"
+         :space-evenly true
+         :halign "start"
+         :spacing 10
 
         (timer_button :id 1 :value custom_timer1)
         (timer_button :id 2 :value custom_timer2)
