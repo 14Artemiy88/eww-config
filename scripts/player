@@ -286,11 +286,12 @@ get_mpv_player_metadata() {
     fi
     [[ -f "$image_path" ]] || image_path="$DEFAULT_IMG"
 
+
     get_json \
         --first_line "$title" \
         --timeleft "$timeleft" \
-        --pos_ms "$position" \
-        --dur_ms "$duration" \
+        --pos_ms "${position%%.*}" \
+        --dur_ms "${duration%%.*}" \
         --image "$image_path" \
         --artist "$DEFAULT_TEXT" \
         --player "mpv"
