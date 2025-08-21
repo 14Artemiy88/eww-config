@@ -2,7 +2,7 @@
 
 declare -r CACHE_DIR="/tmp/weather_cache"
 declare -r CACHE_TTL=600  # 10 минут
-declare -r GISMETEO_TOKEN=$(<token)
+declare -r GISMETEO_TOKEN=$(<$HOME/.config/eww/token)
 
 # Создаем директорию кэша
 mkdir -p "$CACHE_DIR"
