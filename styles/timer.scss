@@ -3,6 +3,17 @@
   margin-top: 5px;
   padding-right: 14px;
 
+  .timer_box {
+    padding: 0;
+    margin-left: -100px;
+  }
+
+  .total_time {
+    font: 20px $LED;
+    padding-right: 10px;
+    margin-top: 5px;
+  }
+
   .timer {
     font: 35px $LED;
   }

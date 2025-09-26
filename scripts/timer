@@ -12,7 +12,7 @@ timer() {
         [[ -f "$file" ]] || continue
 
         local end_time
-        read -r end_time < "$file"
+        read -r total_time end_time < "$file"
         local seconds_left=$((end_time - now))
 
         if (( seconds_left <= 0 )); then
@@ -35,7 +35,7 @@ timer() {
         timer_str=${timer_str##00:} # Удаляем ведущие 00:
 #        color="#$(printf '%s' "$file" | md5sum | cut -c1-6)"
         color="#$(basename "$file")"
-        timers+=("{\"file\":\"$file\", \"timer\":\"$timer_str\", \"color\":\"$color\"}")
+        timers+=("{\"file\":\"$file\", \"total_time\":\"$total_time\", \"timer\":\"$timer_str\", \"color\":\"$color\"}")
     done
 
     # Формируем JSON через jq для безопасности
@@ -74,8 +74,9 @@ timer_add() {
   # Создаем директорию для  таймеров, если не существует
   [[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
 
-#  date -d "+$1 min" +%s > "$TIMER_DIR/$(date '+%s')"
-  date -d "+$1 min" +%s > "$TIMER_DIR/$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)"
+    file="$TIMER_DIR/$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)"
+    end=$(date -d "+$1 min" +%s )
+    echo "$1 $end" > "$file"
 }
 
 # Функция синтеза речи

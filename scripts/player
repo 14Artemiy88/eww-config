@@ -7,10 +7,8 @@ declare -r DEFAULT_TEXT="no image"
 declare -r DEFAULT_TITLE_CLASS="default"
 
 declare -A icons=(
-    ["Playing"]=""
-    ["playing"]=""
-    ["Paused"]=""
-    ["paused"]=""
+    ["Playing"]="" ["playing"]=""
+    ["Paused"]=""  ["paused"]=""
 )
 
 # Основная функция поиска обложки
@@ -34,6 +32,8 @@ find_cover() {
         # Альтернативные имена и регистры
         "Cover.jpg" "Folder.jpg" "Artwork.jpg" "Front.jpg"
         "AlbumArt.jpg" "Album.jpg" "Image.jpg"
+
+        "logo.jpg"
     )
 
     # Проверка в текущем каталоге
@@ -153,6 +153,7 @@ is_youtube_video() {
     [[ "$url" == *"youtube.com/"* ]] && return 0
     [[ "$url" == *"youtu.be/"* ]] && return 0
     [[ "$url" == *"googlevideo.com/"* ]] && return 0
+    [[ "$url" == *"soundcloud.com/"* ]] && return 0
 
     # Проверка по заголовку (для некоторых плееров)
     [[ "$title" == *"YouTube"* ]] && return 0
@@ -330,7 +331,8 @@ get_player_metadata() {
     esac
 
     if is_youtube_video; then
-        service="youtube";
+#         service="youtube";
+        service=$artist;
     else
         image=$(get_image "$img")
     fi
