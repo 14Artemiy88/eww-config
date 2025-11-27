@@ -54,6 +54,19 @@ pause() {
     exit 0
 }
 
+# Основная функция следующего трека
+next() {
+    playerctl -p "$1" next
+    exit 0
+}
+
+# Основная функция следующего трека
+prev() {
+    playerctl -p "$1" prev
+    exit 0
+}
+
+
 # Функция установки позиции
 position() {
     local pos_percent="$1"
@@ -90,4 +103,6 @@ position() {
 case "$1" in
     pause) pause "$2" ;;
     position) position "$2" ;;
+    next) next "$2" ;;
+    prev) prev "$2" ;;
 esac

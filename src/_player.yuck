@@ -8,21 +8,25 @@
         :space-evenly false
         :tooltip {player.title}
         :style "background-image: url('${player.image}');  background-size: contain; background-position: center; background-repeat: no-repeat; "
+
         (button
             :class "button"
             :height 160
             :onclick "scripts/player_pausing pause ${player.player}"
         )
         (label
-            :class "no_image ${player.title_class}"
+            :wrap true
+            :class "no_image ${player.title_class} ${matches(player.text, '[_а-яА-Я0-9]') ? 'rus' : 'en'} ${strlength(player.text) < 24 ? 'sym${strlength(player.text)}' : 'long'}"
             :text {player.image == "images/1px.png" || player.image == "/run/user/1000/album_cover.png" ? player.text : ""}
         )
  ;;       (cavastuff)
-        ( box :class "button" :halign "start" :orientation "v"
-            (label :text {player.status} )
+        ( box :halign "start" :orientation "v"
+            (label  :class "button" :text {player.status} )
+            (button :class "button_next" :visible {strlength(player.player) > 0 ? true : false} :onclick "scripts/player_pausing next ${player.player}"  (label :text "󰒭" ) )
+  ;;          (button :class "button_prev" :visible {strlength(player.player) > 0 ? true : false} :onclick "scripts/player_pausing prev ${player.player}"  (label :text "󰒮" ) )
         )
-        ( label :class "time"   :halign "end"   :text {player.timeleft}  )
-        ( label :class "third_line" :halign "start" :text {player.third_line} :limit-width 60 )
+        ( label :class "time"        :halign "end"   :text {player.timeleft}  )
+        ( label :class "third_line"  :halign "start" :text {player.third_line}  :limit-width 60 )
         ( label :class "second_line" :halign "start" :text {player.second_line} :limit-width 60 )
         ( label :class "first_line"  :halign "start" :text {player.first_line}  :limit-width 60 )
         (scale

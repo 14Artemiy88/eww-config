@@ -11,20 +11,33 @@ timer() {
     for file in $(ls -1tr "$TIMER_DIR"/*); do
         [[ -f "$file" ]] || continue
 
-        local end_time
-        read -r total_time end_time < "$file"
-        local seconds_left=$((end_time - now))
+        local end_time sign ding comment
+        read -r total_time end_time ding comment < "$file"
 
-        if (( seconds_left <= 0 )); then
-            rm -f "$file"
+        if [[ -z "$comment" ]]; then
+            comment="$total_time"
+        fi
+
+        local seconds_left=$((end_time - now))
+        local sign=""
+        if (( seconds_left < 0 )); then
+            sign="-"
+        fi
+
+        if (( seconds_left <= 0 && ding == 0 )); then
+            # rm -f "$file"
+            echo "$total_time $end_time 1" > "$file"
 
             say "$MESSAGE"
-            kdialog --imgbox ~/Images/D/100-1/50.jpg --title "$MESSAGE" &>/dev/null &
+            kdialog --imgbox ~/Images/D/100-1/50.jpg --title "$total_time мин $comment" &>/dev/null &
 
-            continue
+
+            # continue
         fi
 
         # Форматирование времени без вызова date
+        seconds_left=${seconds_left#-}
+        
         local hours=$((seconds_left / 3600))
         local minutes=$(( (seconds_left % 3600) / 60 ))
         local seconds=$((seconds_left % 60))
@@ -33,9 +46,11 @@ timer() {
         local timer_str color
         timer_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
         timer_str=${timer_str##00:} # Удаляем ведущие 00:
+        timer_str=$(echo "$sign $timer_str")
 #        color="#$(printf '%s' "$file" | md5sum | cut -c1-6)"
         color="#$(basename "$file")"
-        timers+=("{\"file\":\"$file\", \"total_time\":\"$total_time\", \"timer\":\"$timer_str\", \"color\":\"$color\"}")
+#        timers+=("{\"file\":\"$file\", \"total_time\":\"$total_time\", \"timer\":\"$timer_str\", \"color\":\"$color\", \"comment\":\"$comment\"}")
+        timers+=("{\"file\":\"$file\", \"comment\":\"$comment\", \"timer\":\"$timer_str\", \"color\":\"$color\"}")
     done
 
     # Формируем JSON через jq для безопасности
@@ -50,20 +65,20 @@ timer_up() {
     local file="$1"
     [[ -f "$file" ]] || return
 
-    local current_time
-    read -r current_time < "$file"
-    echo $((current_time + 60)) > "$file"
+    local total_time end_time
+    read -r total_time end_time _ comment < "$file"
+    echo "$((total_time + 1)) $((end_time + 60)) 0 $comment" > "$file"
 }
 
 timer_down() {
     local file="$1"
     [[ -f "$file" ]] || return
 
-    local current_time
-    read -r current_time < "$file"
-    local new_time=$((current_time - 60))
+    local total_time end_time
+    read -r total_time end_time _ comment < "$file"
+    local new_time=$((end_time - 60))
 
-    (( new_time > $(date '+%s') )) && echo "$new_time" > "$file" || rm -f "$file"
+    (( new_time > $(date '+%s') )) && echo "$((total_time - 1)) $new_time 0 $comment" > "$file" || rm -f "$file"
 }
 
 timer_delete() {
@@ -75,8 +90,9 @@ timer_add() {
   [[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
 
     file="$TIMER_DIR/$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)"
+    # end=$(date -d "+$1 min" +%s )
     end=$(date -d "+$1 min" +%s )
-    echo "$1 $end" > "$file"
+    echo "$1 $end 0" > "$file"
 }
 
 # Функция синтеза речи
@@ -88,6 +104,17 @@ update_color() {
   mv "$1" "$TIMER_DIR/$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)"
 }
 
+comment() {
+
+    local file="$1"
+
+    local end_time sign ding comment
+    read -r total_time end_time ding comment < "$file"
+    comment=$(kdialog --inputbox "Комментарий" "$comment")
+
+    echo "$total_time $end_time $ding $comment" > "$file" || rm -f "$file"
+}
+
 # Главная логика
 case "$1" in
     add)          timer_add "$2";;
@@ -95,5 +122,6 @@ case "$1" in
     down)         timer_down "$2" ;;
     delete)       timer_delete "$2" ;;
     update_color) update_color "$2" ;;
+    comment)      comment "$2" ;;
     *)            timer ;;
 esac
