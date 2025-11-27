@@ -320,7 +320,7 @@ get_player_metadata() {
 
     case "$title" in
         *"Кинопоиск"*) service="kinopoisk"; title=${title/" — смотреть онлайн в хорошем качестве — Кинопоиск"/} ;;
-        *"Twitch"*)    service="twitch";    title=${title/" - Twitch"/} ;;
+        *"Twitch"*)    service="twitch";    title=${title/" - Twitch"/}; service=$title; ;;
         *"VK"*)        service="vk";        title=${title/"VK Видео — смотрѣть безплатно"/} ;;
         *"Телемост"*)
             get_json \
@@ -331,8 +331,7 @@ get_player_metadata() {
     esac
 
     if is_youtube_video; then
-#         service="youtube";
-        service=$artist;
+        service="${artist:-youtube}"
     else
         image=$(get_image "$img")
     fi
