@@ -86,7 +86,7 @@
             temp > -10 ? "color: #bae1ff" :
             temp > -20 ? "color: #0ad1f3" :
             temp > -30 ? "color: #3c82e2" :
-                         "color: #0000cc"
+                         "color: #ffffff; background-color: #0000cc;"
         }
         :text {temp >= 30 ? "󰈸 ${temp}°" : "${temp}°"}
         :class class

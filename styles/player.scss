@@ -22,7 +22,8 @@ $font: "Ubuntu Mono Nerd Font";
   .no_image {
   	/* background: #cccc00; */
   	min-width: 220px;
-    font: 50px "Deadwax DEMO Extreme", HARDBOR, serif;
+    /* font: 50px "Deadwax DEMO Extreme", HARDBOR, serif; */
+    font: 50px "HARDBOR", serif;
     margin: -130px 0 0 0px;
 
     &.more_ten { font-size: 35px }
@@ -39,23 +40,6 @@ $font: "Ubuntu Mono Nerd Font";
     &.sym22 { font-size: 31px }
     &.sym23 { font-size: 30px }
     &.long  { font-size: 25px }
-
-    &.rus {
-      font: 80px HARDBOR, serif;
-
-      //&.sym13 { font-size: 54px }
-      &.sym14 { font-size: 53px }
-      //&.sym15 { font-size: 53px }
-      //&.sym16 { font-size: 48px }
-      //&.sym17 { font-size: 46px }
-      //&.sym18 { font-size: 45px }
-      //&.sym19 { font-size: 44px }
-      //&.sym20 { font-size: 43px }
-      //&.sym21 { font-size: 42px }
-      //&.sym22 { font-size: 41px }
-      //&.sym23 { font-size: 40px }
-      &.long  { font-size: 30px }
-    }
   }
 
 

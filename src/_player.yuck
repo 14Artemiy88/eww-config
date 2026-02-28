@@ -16,7 +16,8 @@
         )
         (label
             :wrap true
-            :class "no_image ${player.title_class} ${matches(player.text, '[_а-яА-Я0-9]') ? 'rus' : 'en'} ${strlength(player.text) < 24 ? 'sym${strlength(player.text)}' : 'long'}"
+        ;;    :class "no_image ${player.title_class} ${matches(player.text, '[_а-яА-Я0-9]') ? 'rus' : 'en'} ${strlength(player.text) < 24 ? 'sym${strlength(player.text)}' : 'long'}"
+            :class "no_image ${player.title_class} ${strlength(player.text) < 24 ? 'sym${strlength(player.text)}' : 'long'}"
             :text {player.image == "images/1px.png" || player.image == "/run/user/1000/album_cover.png" ? player.text : ""}
         )
  ;;       (cavastuff)

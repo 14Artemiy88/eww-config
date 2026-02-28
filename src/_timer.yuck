@@ -2,7 +2,7 @@
 (defvar default_timers '["5", "10", "15"]')
 (defvar show_set_timers false)
 (defvar custom_timer1 5)
-(defvar custom_timer2 10)
+(defvar custom_timer2 7)
 (defvar custom_timer3 15)
 (defvar scroll "")
 
