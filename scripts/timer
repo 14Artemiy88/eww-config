@@ -12,7 +12,7 @@ timer() {
         [[ -f "$file" ]] || continue
 
         local end_time sign ding comment color
-        read -r total_time end_time ding comment color < "$file"
+        read -r total_time end_time ding color comment < "$file"
 
         local seconds_left=$((end_time - now))
         local sign=""
@@ -22,7 +22,7 @@ timer() {
 
         if (( seconds_left <= 0 && ding == 0 )); then
             # rm -f "$file"
-            echo "$total_time $end_time 1 $comment" > "$file"
+            echo "$total_time $end_time 1 888888 $comment" > "$file"
 
             say "$MESSAGE"
             kdialog --imgbox ~/Images/D/100-1/50.jpg --title "$total_time мин $comment" &>/dev/null &
@@ -62,13 +62,13 @@ timer_up() {
     [[ -f "$file" ]] || return
 
     local total_time end_time new_time now ding color
-    read -r total_time end_time _ comment color < "$file"
+    read -r total_time end_time _ color comment < "$file"
 
     new_time=$((end_time + 60))
     now=$(date '+%s')
     ding=$((new_time - now <= 0))
 
-    echo "$((total_time + 1)) $new_time $ding $comment $color" > "$file"
+    echo "$((total_time + 1)) $new_time $ding $color $comment" > "$file"
 }
 
 timer_down() {
@@ -76,11 +76,11 @@ timer_down() {
     [[ -f "$file" ]] || return
 
     local total_time end_time new_time
-    read -r total_time end_time _ comment color < "$file"
+    read -r total_time end_time _ color comment < "$file"
 
     new_time=$((end_time - 60))
 
-    (( new_time > $(date '+%s') )) && echo "$((total_time - 1)) $new_time 0 $comment $color" > "$file" || rm -f "$file"
+    (( new_time > $(date '+%s') )) && echo "$((total_time - 1)) $new_time 0 $color $comment" > "$file" || rm -f "$file"
 }
 
 timer_delete() {
@@ -94,11 +94,12 @@ timer_add() {
     local now color end msg
 
     now=$(date '+%s')
-    msg=${2:-$1}
+#    msg=${2:-$1}
+    msg=$2
     color=$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)
     end=$(date -d "+$1 min" +%s )
 
-    echo "$1 $end 0 $msg $color" > "$TIMER_DIR/$now"
+    echo "$1 $end 0 $color $msg" > "$TIMER_DIR/$now"
 }
 
 # Функция синтеза речи
@@ -109,21 +110,21 @@ say() {
 update_color() {
     local file="$1"
     local end_time sign ding comment color
-    read -r total_time end_time ding comment _ < "$file"
+    read -r total_time end_time ding _ comment < "$file"
 
     color=$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)
 
-    echo "$total_time $end_time $ding $comment $color " > "$file" || rm -f "$file"
+    echo "$total_time $end_time $ding $color $comment " > "$file" || rm -f "$file"
 }
 
 comment() {
     local file="$1"
     local end_time sign ding comment color
-    read -r total_time end_time ding comment color < "$file"
+    read -r total_time end_time ding color comment < "$file"
 
     comment=$(kdialog --inputbox "Комментарий" "$comment")
 
-    echo "$total_time $end_time $ding $comment $color" > "$file" || rm -f "$file"
+    echo "$total_time $end_time $ding $color $comment" > "$file" || rm -f "$file"
 }
 
 # Главная логика
