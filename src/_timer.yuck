@@ -30,9 +30,22 @@
                         :orientation "hs"
                         :class "timer_box"
 
-                        (label :halign "end" :class "comment" :text "${time.comment}" :style "color: ${time.color};" )
-                    ;;    (label :halign "end" :class "total_time" :text "${time.total_time}" :style "color: ${time.color};" )
-                        (label :halign "end" :class "timer" :text "${time.timer}" :style "color: ${time.color};" )
+                        (label
+                            :halign "end"
+                            :class "comment"
+                            :text "${time.comment}"
+                            :style "color: ${time.color};"
+                         )
+                        (label
+                            :halign "end"
+                            :class "timer"
+                            :text "${time.sign}${time.timer}"
+                            :style "${
+                                time.sign == '' ?
+                                'color: ${time.color};' :
+                                'color: #222; text-shadow: ${time.color} 1px 1px 0, ${time.color} -1px -1px 0, ${time.color} 1px -1px 0, ${time.color} -1px 1px 0;'
+                            }"
+                        )
                     )
                 )
             )

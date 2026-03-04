@@ -22,7 +22,7 @@ timer() {
 
         if (( seconds_left <= 0 && ding == 0 )); then
             # rm -f "$file"
-            echo "$total_time $end_time 1 888888 $comment" > "$file"
+            echo "$total_time $end_time 1 $color $comment" > "$file"
 
             say "$MESSAGE"
             kdialog --imgbox ~/Images/D/100-1/50.jpg --title "$total_time мин $comment" &>/dev/null &
@@ -45,8 +45,8 @@ timer() {
         local timer_str
         timer_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
         timer_str=${timer_str##00:} # Удаляем ведущие 00:
-        timer_str=$(echo "$sign$timer_str")
-        timers+=("{\"file\":\"$file\", \"comment\":\"$comment\", \"timer\":\"$timer_str\", \"color\":\"#$color\"}")
+#        timer_str=$(echo "$sign$timer_str")
+        timers+=("{\"file\":\"$file\", \"comment\":\"$comment\", \"timer\":\"$timer_str\", \"color\":\"#$color\", \"sign\":\"$sign\"}")
     done
 
     # Формируем JSON через jq для безопасности
