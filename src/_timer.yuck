@@ -1,5 +1,5 @@
 (defpoll timer :interval "1s" `scripts/timer`)
-(defvar default_timers '["5", "10", "15"]')
+(defvar default_timers '["5", "7", "15"]')
 (defvar show_set_timers false)
 (defvar custom_timer1 5)
 (defvar custom_timer2 7)
@@ -106,7 +106,7 @@
         (eventbox
             :class "set_timer"
             :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer add '${value}'"
-            :onscroll "eww update scroll={}; eww update custom_timer${id}=${scroll == 'up' ? value + 1 : value - 1}"
+            :onscroll "eww update scroll={}; eww update custom_timer${id}=${scroll == 'up' ? value + 1 : (value > 0 ? value - 1 : 0)}"
             :onmiddleclick "eww update custom_timer${id}=${default_timers[id - 1]};"
             (label :text "${value}" )
         )
