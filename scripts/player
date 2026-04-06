@@ -304,7 +304,7 @@ get_player_metadata() {
     local service="$DEFAULT_TEXT"
     local s="💩" # разделитель
     local params="{{ title }}${s}{{ artist }}${s}{{ position }}${s}{{ mpris:length }}${s}-{{ duration(mpris:length - position) }}${s}{{ mpris:artUrl }}"
-    local players=("org.telegram.desktop" "plasma-browser-integration")
+    local players=("org.telegram.desktop" "spotify" "plasma-browser-integration")
     local metadata status title artist position len timeleft img
 
     for player in "${players[@]}"; do
