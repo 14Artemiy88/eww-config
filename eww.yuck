@@ -92,6 +92,13 @@
     (timerstuff)
 )
 
+( defwindow timer_options
+    :monitor "LCD195VXM+"
+    :geometry ( geometry :anchor "top left" :x "325" :y "870" :width "0" :height "0" )
+    :stacking "bottom"
+
+    (timer_options)
+)
 
 (defwindow calendar
     :monitor "LCD195VXM+"

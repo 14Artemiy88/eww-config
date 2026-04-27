@@ -43,6 +43,5 @@
             :day calendar_day
             :year calendar_year
         )
-
     )
 )

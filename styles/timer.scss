@@ -60,3 +60,32 @@
     }
   }
 }
+
+.timer_options {
+  border: 1px solid $base-color;
+  border-radius: $br;
+  background-color: $background;
+
+  //min-height: 100px;
+  //min-width: 50px;
+}
+
+.time_passed {
+  font: 25px $LED;
+  padding: 10px 10px 0 10px;
+  //margin: 10px;
+}
+
+//.color-button {
+//  margin: 10px;
+//  border-radius: $br;
+//  transition: box-shadow .2s;
+//
+//  &:hover {
+//    box-shadow: $boxShadow;
+//  }
+//}
+
+.timer_options_button {
+  font-size: 25px;
+}

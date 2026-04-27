@@ -11,10 +11,15 @@ timer() {
     for file in "$TIMER_DIR"/*; do
         [[ -f "$file" ]] || continue
 
-        local end_time ding comment color seconds_left sign
-        read -r total_time end_time ding color comment < "$file"
+        read_timer_file "$file" || return
 
-        seconds_left=$((end_time - now))
+        # Если на паузе, используем время начала паузы вместо текущего
+        local display_now=$now
+        if (( paused_at > 0 )); then
+            display_now=$paused_at
+        fi
+
+        seconds_left=$((end_time - display_now))
 
         sign=""
         if (( seconds_left < 0 )); then
@@ -22,28 +27,25 @@ timer() {
         fi
 
         if (( seconds_left <= 0 && ding == 0 )); then
-#            sign=" + "
-            echo "$total_time $end_time 1 $color $comment" > "$file"
-            say "$MESSAGE"
+            ding=1
+            write_timer_file "$file"
+            say "$MESSAGE" &
             kdialog --imgbox ~/Images/D/100-1/50.jpg --title "$total_time мин $comment" &>/dev/null &
         fi
 
         if [[ -z "$comment" ]]; then
             comment="$total_time"
         fi
-	
-        # Форматирование времени без вызова date
-        seconds_left=${seconds_left#-}
-        
-        local hours=$((seconds_left / 3600))
-        local minutes=$(( (seconds_left % 3600) / 60 ))
-        local seconds=$((seconds_left % 60))
 
-        # Форматирование в HH:MM:SS
-        local timer_str
-        timer_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
-        timer_str=${timer_str##00:} # Удаляем ведущие 00:
-        timers+=("{\"file\":\"$file\", \"comment\":\"$comment\", \"timer\":\"$timer_str\", \"color\":\"#$color\", \"sign\":\"$sign\"}")
+        time_passed=$(format_time $((total_time*60 - seconds_left)))
+
+        if (( paused_at > 0 )); then
+            timer_str="PAUSED"
+        else
+            timer_str=$(format_time ${seconds_left#-})
+        fi
+
+        timers+=("{\"file\":\"$file\", \"comment\":\"$comment\", \"timer\":\"$timer_str\", \"color\":\"#$color\", \"sign\":\"$sign\", \"time_passed\":\"$time_passed\"}")
     done
 
     # Формируем JSON через jq для безопасности
@@ -56,28 +58,24 @@ timer() {
 
 timer_up() {
     local file="$1"
-    [[ -f "$file" ]] || return
+    read_timer_file "$file" || return
 
-    local total_time end_time new_time now ding color
-    read -r total_time end_time _ color comment < "$file"
-
-    new_time=$((end_time + 60))
+    end_time=$((end_time + 60))
     now=$(date '+%s')
-    ding=$((new_time - now <= 0))
+    ding=$((end_time - now <= 0))
+    total_time=$((total_time + 1))
 
-    echo "$((total_time + 1)) $new_time $ding $color $comment" > "$file"
+    write_timer_file "$file"
 }
 
 timer_down() {
     local file="$1"
-    [[ -f "$file" ]] || return
+    read_timer_file "$file" || return
 
-    local total_time end_time new_time
-    read -r total_time end_time _ color comment < "$file"
+    end_time=$((end_time - 60))
+    total_time=$((total_time - 1))
 
-    new_time=$((end_time - 60))
-
-    (( new_time > $(date '+%s') )) && echo "$((total_time - 1)) $new_time 0 $color $comment" > "$file" || rm -f "$file"
+    (( end_time > $(date '+%s') )) && write_timer_file "$file"
 }
 
 timer_delete() {
@@ -85,13 +83,13 @@ timer_delete() {
 }
 
 timer_add() {
-  # Создаем директорию для  таймеров, если не существует
-  [[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
+    # Создаем директорию для таймеров, если не существует
+    [[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
 
     local file
     file="$TIMER_DIR/$(date '+%s')"
 
-    echo "$1 $(date -d "+$1 min" +%s ) 0 $(get_color) $2" > "$file"
+    echo "$1 $(date -d "+$1 min" +%s ) 0 $(get_color) 0 $2" > "$file"
 }
 
 # Функция синтеза речи
@@ -99,26 +97,113 @@ say() {
     [[ -n "$1" ]] && echo "$1" | festival --tts --language russian &>/dev/null
 }
 
-get_color() {
-    printf '%s' "$(date '+%s')" | md5sum | cut -c1-6
+read_timer_file() {
+    local file="$1"
+    [[ -f "$file" ]] || return 1
+    read -r total_time end_time ding color paused_at comment < "$file"
 }
+
+write_timer_file() {
+    local file="$1"
+    echo "$total_time $end_time $ding $color $paused_at $comment" > "$file" || rm -f "$file"
+}
+
+get_color() {
+    # Генерируем детерминированный цвет с минимальной яркостью
+    local hash
+    hash=$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)
+    local r=$((0x${hash:0:2}))
+    local g=$((0x${hash:2:2}))
+    local b=$((0x${hash:4:2}))
+
+    # Увеличиваем яркость: каждый компонент минимум 96
+    (( r < 96 )) && r=$((r + 96))
+    (( g < 96 )) && g=$((g + 96))
+    (( b < 96 )) && b=$((b + 96))
+
+    # Ограничиваем максимум 255
+    (( r > 255 )) && r=255
+    (( g > 255 )) && g=255
+    (( b > 255 )) && b=255
+
+    printf '%02x%02x%02x' "$r" "$g" "$b"
+}
+
+format_time() {
+    local total_seconds=$1
+    local hours=$((total_seconds / 3600))
+    local minutes=$(( (total_seconds % 3600) / 60 ))
+    local seconds=$((total_seconds % 60))
+
+    local time_str
+    time_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+    time_str=${time_str##00:} # Удаляем ведущие 00:
+    echo "$time_str"
+}
+
+#rgb_to_hex() {
+#    local input="$1"
+#    local r g b
+#    read -r r g b <<< "$(echo "$input" | sed -E 's/rgb\(([0-9]+),\s*([0-9]+),\s*([0-9]+)\)/\1 \2 \3/')"
+#    printf '%02x%02x%02x\n' "$r" "$g" "$b"
+#}
+#
+#set_color() {
+##     kdialog --textinputbox "eweqweqw" "qeqqeweqweq"
+#    local file="$1"
+#    local end_time sign ding comment
+#    read -r total_time end_time ding _ comment < "$file"
+#
+#    echo "$total_time $end_time $ding $(rgb_to_hex "$2") $comment" > "$file" || rm -f "$file"
+#}
 
 update_color() {
     local file="$1"
-    local end_time sign ding comment
-    read -r total_time end_time ding _ comment < "$file"
+    read_timer_file "$file" || return
 
-    echo "$total_time $end_time $ding $(get_color) $comment " > "$file" || rm -f "$file"
+    color=$(get_color)
+    write_timer_file "$file"
 }
 
 comment() {
     local file="$1"
-    local end_time sign ding comment color
-    read -r total_time end_time ding color comment < "$file"
+    read_timer_file "$file" || return
 
-    comment=$(kdialog --inputbox "Комментарий" "$comment")
+    local new_comment
+    new_comment=$(kdialog --inputbox "Комментарий" "$comment")
 
-    echo "$total_time $end_time $ding $color $comment" > "$file" || rm -f "$file"
+    if [[ $? -eq 0 ]]; then
+        comment="$new_comment"
+        write_timer_file "$file"
+    else
+        rm -f "$file"
+    fi
+}
+
+refresh() {
+    local file="$1"
+    read_timer_file "$file" || return
+
+    end_time=$(date -d "+$total_time min" +%s)
+    write_timer_file "$file"
+}
+
+toggle_pause() {
+    local file="$1"
+    read_timer_file "$file" || return
+
+    local now
+    now=$(date '+%s')
+    if (( paused_at == 0 )); then
+        # Включаем паузу
+        paused_at=$now
+    else
+        # Выключаем паузу - добавляем прошедшее время к end_time
+        local paused_duration=$((now - paused_at))
+        end_time=$((end_time + paused_duration))
+        paused_at=0
+    fi
+    write_timer_file "$file"
 }
 
 # Главная логика
@@ -128,6 +213,9 @@ case "$1" in
     down)         timer_down "$2" ;;
     delete)       timer_delete "$2" ;;
     update_color) update_color "$2" ;;
+    set_color)    set_color "$2" "$3" ;;
     comment)      comment "$2" ;;
+    refresh)      refresh "$2" ;;
+    toggle_pause) toggle_pause "$2" ;;
     *)            timer ;;
 esac
