@@ -15,7 +15,6 @@
   }
 
   .comment {
-    //font: 20px $LED, "Digital Counter 7";
     font: 15px "Pixel LCD7";
     padding-right: 5px;
     margin-top: 5px;
@@ -53,7 +52,7 @@
       }
 
       .set_custom_timer {
-        color: #cccccc;
+        color: #ccc;
         margin-right: -125px;
         padding-left: 5px;
       }
@@ -65,26 +64,12 @@
   border: 1px solid $base-color;
   border-radius: $br;
   background-color: $background;
-
-  //min-height: 100px;
-  //min-width: 50px;
 }
 
 .time_passed {
   font: 25px $LED;
-  padding: 10px 10px 0 10px;
-  //margin: 10px;
+  padding: 10px 10px 0;
 }
-
-//.color-button {
-//  margin: 10px;
-//  border-radius: $br;
-//  transition: box-shadow .2s;
-//
-//  &:hover {
-//    box-shadow: $boxShadow;
-//  }
-//}
 
 .timer_options_button {
   font-size: 25px;
