@@ -21,6 +21,9 @@
         (box
             :orientation "v"
             :halign "end"
+      ;;       :space-evenly false
+         :style "min-width: 150px"
+             
             (for time in {timer_list}
                 (timer :time time)
             )
@@ -38,11 +41,14 @@
          :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}' ; eww update show_timer_options=false"
          :onhover       "eww update timer_options_file=${time.file} timer_options_color=${time.color} timer_options_time='${time.time_passed}'"
 
+     ;;    :style "background: ${time.color};"
+
          (box
              :orientation "hs"
              :class "timer_box"
-           ;;  :space-evenly false
              :tooltip "${time.time_passed}"
+             :space-evenly false
+             :halign "end"
 
              (label
                  :halign "end"

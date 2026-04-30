@@ -1,4 +1,4 @@
- (defpoll getgpu :interval "1s" "scripts/getgpu || echo 0")
+;; (defpoll getgpu :interval "1s" "scripts/getgpu || echo 0")
 
 (defwidget cpustuff []
     (box
@@ -15,7 +15,7 @@
         (metric :class "cpustuffBar CPU7" :label " " :value {EWW_CPU.cores[6].usage}  )
         (metric :class "cpustuffBar CPU8" :label " " :value {EWW_CPU.cores[7].usage}  )
         (metric :class "cpustuffBar RAM"  :label " " :value {EWW_RAM.used_mem_perc}   )
-        (metric :class "cpustuffBar GPU"  :label "󰡀 " :value getgpu                    )
+    ;;    (metric :class "cpustuffBar GPU"  :label "󰡀 " :value getgpu                    )
     )
 )
 

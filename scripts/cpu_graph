@@ -1,67 +1,50 @@
 #!/bin/bash
 
-declare -r FILE_PATH="/run/user/1000/eww_cpu_graph"
-declare -r CPU_PATH="/run/user/1000/eww_cpu"
-declare -ri LINES=51
+STATE="/run/user/1000/eww_cpu_graph"
+LINES=51
 
-function cpu_graph() {
-    # Читаем текущие значения из файлов
-    local current_history
-    [[ -f "$FILE_PATH" ]] && read -r current_history < "$FILE_PATH"
-
-    # Получаем новое значение CPU
-    local new_value
-    new_value=$(get_cpus)
-
-    # Обновляем историю
-    if [[ -n "$current_history" ]]; then
-        # Удаляем самое старое значение и добавляем новое
-        current_history="${current_history#*,}"
-        current_history+=",$new_value"
-    else
-        # Инициализация при первом запуске
-        current_history="0"
-        for ((i=1; i<LINES; i++)); do current_history+=",0"; done
-    fi
-
-    # Сохраняем обновленную историю
-    echo "$current_history" > "$FILE_PATH"
-
-    # Формируем вывод JSON
-    echo "[$current_history]"
+awk -v state="$STATE" -v lines="$LINES" '
+BEGIN {
+    has_prev = 0
+    hist = ""
+    if ((getline < state) > 0) {
+        prev_user = $1 + 0; prev_nice = $2 + 0; prev_idle = $3 + 0
+        if ((getline hist < state) > 0) {}
+        close(state)
+        has_prev = 1
+    }
+    if (hist == "") {
+        hist = "0"
+        for (i = 2; i <= lines; i++) hist = hist ",0"
+    }
 }
+/^cpu / {
+    user = $2 + 0; nice = $4 + 0; idle = $5 + 0
 
-function get_cpus() {
-    local prev_values current_values
-    local u u1 t t1
+    if (has_prev) {
+        u1 = prev_user + prev_nice
+        t1 = u1 + prev_idle
+        u = user + nice
+        t = u + idle
+        dt = t - t1
+        if (dt > 0) {
+            du = u - u1
+            if (du < 0) du = 0
+            pct = int(du * 100 / dt)
+        } else {
+            pct = 0
+        }
+    } else {
+        pct = 0
+    }
 
-    # Читаем предыдущие значения
-    [[ -f "$CPU_PATH" ]] && read -ra prev_values < "$CPU_PATH"
+    sub(/^[^,]+,/, "", hist)
+    hist = hist "," pct
 
-    # Читаем текущие значения из /proc/stat
-    read -ra current_values < <(awk '/^cpu / {print $2, $4, $5}' /proc/stat)
+    printf "[" hist "]\n"
 
-    # Вычисляем загрузку CPU
-    if [[ -n "${prev_values[*]}" ]]; then
-        u1=$((prev_values[0] + prev_values[1]))
-        t1=$((u1 + prev_values[2]))
-
-        u=$((current_values[0] + current_values[1]))
-        t=$((u + current_values[2]))
-
-        # Вычисляем процент загрузки
-        if (( t - t1 > 0 )); then
-            printf "%d" $(( (u - u1) * 100 / (t - t1) ))
-        else
-            printf "0"
-        fi
-    else
-        printf "0"
-    fi
-
-    # Сохраняем текущие значения для следующего вызова
-    printf "%s\n" "${current_values[*]}" > "$CPU_PATH"
+    print user, nice, idle > state
+    print hist > state
+    close(state)
 }
-
-# Главный вызов
-cpu_graph
+' /proc/stat

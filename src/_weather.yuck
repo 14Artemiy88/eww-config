@@ -5,7 +5,7 @@
 (defvar weather_by_time_list_width 300)
 
 (defwidget weather_by_time_list [weather]
-	(eventbox
+    (eventbox
         :onclick "eww update weather_by_time_list_width=${weather_by_time_list_width+66}"
         :onrightclick "eww reload"
         :onmiddleclick "eww update weather_by_time_list_width=750"
@@ -88,7 +88,7 @@
             temp > -30 ? "color: #3c82e2" :
                          "color: #ffffff; background-color: #0000cc;"
         }
-        :text {temp >= 30 ? "󰈸 ${temp}°" : "${temp}°"}
+        :text "${temp >= 30 ? "󰈸 " : ""}${temp}°"
         :class class
         :halign "center"
         :valign "end"
