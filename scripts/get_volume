@@ -1,0 +1,10 @@
+#!/bin/bash
+# Возвращает текущую громкость Master или пустую строку если muted
+amixer -D pulse sget Master | awk -F"[][]" '
+    /Left:/ {
+        if (/on\]/) {
+            print $2
+        }
+        exit
+    }
+' | tr -d '%'

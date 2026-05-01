@@ -61,7 +61,7 @@ timer_up() {
     read_timer_file "$file" || return
 
     end_time=$((end_time + 60))
-    now=$(date '+%s')
+    local now=$(date '+%s')
     ding=$((end_time - now <= 0))
     total_time=$((total_time + 1))
 
@@ -75,7 +75,8 @@ timer_down() {
     end_time=$((end_time - 60))
     total_time=$((total_time - 1))
 
-    (( end_time > $(date '+%s') )) && write_timer_file "$file"
+    local now=$(date '+%s')
+    (( end_time > now )) && write_timer_file "$file"
 }
 
 timer_delete() {
@@ -86,8 +87,9 @@ timer_add() {
     # Создаем директорию для таймеров, если не существует
     [[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
 
-    local file
-    file="$TIMER_DIR/$(date '+%s')"
+    local file now
+    now=$(date '+%s')
+    file="$TIMER_DIR/${now}_$RANDOM"
 
     echo "$1 $(date -d "+$1 min" +%s ) 0 $(get_color) 0 $2" > "$file"
 }
@@ -109,9 +111,9 @@ write_timer_file() {
 }
 
 get_color() {
-    # Генерируем детерминированный цвет с минимальной яркостью
+    # Генерируем уникальный цвет с минимальной яркостью
     local hash
-    hash=$(printf '%s' "$(date '+%s')" | md5sum | cut -c1-6)
+    hash=$(printf '%s' "$(date '+%s')$RANDOM" | md5sum | cut -c1-6)
     local r=$((0x${hash:0:2}))
     local g=$((0x${hash:2:2}))
     local b=$((0x${hash:4:2}))
@@ -136,9 +138,9 @@ format_time() {
     local seconds=$((total_seconds % 60))
 
     local time_str
-    time_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+    printf -v time_str "%02d:%02d:%02d" $hours $minutes $seconds
     time_str=${time_str##00:} # Удаляем ведущие 00:
-    echo "$time_str"
+    printf '%s\n' "$time_str"
 }
 
 #rgb_to_hex() {
@@ -185,6 +187,8 @@ refresh() {
     read_timer_file "$file" || return
 
     end_time=$(date -d "+$total_time min" +%s)
+	  ding=0
+
     write_timer_file "$file"
 }
 

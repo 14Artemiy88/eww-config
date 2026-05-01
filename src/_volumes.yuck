@@ -1,5 +1,5 @@
 (defpoll volumes        :interval "1s" "scripts/volumes")
-(defpoll current_volume :interval "1s" "amixer -D pulse sget Master | ag 'Right:' | ag 'on\]' | awk -F'[][]' '{ print $2 }' | tr -d '%'")
+(defpoll current_volume :interval "1s" "scripts/get_volume")
 
 (defwidget volumestuff []
     (box
@@ -12,7 +12,7 @@
             :class "volume_box"
             :space-evenly false
             :orientation "h"
-            (label :class "icon" :halign "start" :text {strlength(current_volume) > 0 ? '󰕾' : '󰖁' } )
+            (label :class "icon" :halign "start" :text {current_volume != "" ? '󰕾' : '󰖁' } )
             (scale
                 :class "volume main_volume"
                 :value {current_volume ?: 0}

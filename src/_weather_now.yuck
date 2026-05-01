@@ -4,7 +4,7 @@
     (box
         :orientation "h"
         :class "stuff weathernow"
-        :space-evenly true
+        :space-evenly false
 
         (box
         	:class "left_part"

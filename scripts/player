@@ -77,25 +77,9 @@ find_cover() {
     return 1
 }
 
-# Оптимизированная функция экранирования
 escape_path() {
     local path="$1"
-    # Одним проходом обрабатываем все спецсимволы
-    local result=""
-    local i=0
-    while (( i < ${#path} )); do
-        local char="${path:i:1}"
-        case "$char" in
-            \\ | \' | \")
-                result+="\\\\$char"
-                ;;
-            *)
-                result+="$char"
-                ;;
-        esac
-        ((i++))
-    done
-    echo -n "$result"
+    printf '%s' "$path" | sed 's/[\\'"'"'"]/\\&/g'
 }
 
 # Основная функция
@@ -136,8 +120,13 @@ get_album_img() {
     fi
 }
 
-#copy and resize image to destination
-ffmpeg -loglevel 0 -y -i "$art" -vf "scale=$COVER_SIZE:-1" "$COVER"
+# copy and resize image to destination - function called when needed
+copy_and_resize_image() {
+    local art="$1"
+    local cover="$2"
+    local size="${3:-200}"
+    ffmpeg -loglevel 0 -y -i "$art" -vf "scale=${size}:-1" "$cover" 2>/dev/null
+}
 
 
 # Создаем директорию для изображений, если не существует
@@ -243,7 +232,7 @@ get_mopidy_player_metadata() {
         --second_line "$format_album" \
         --timeleft "$time_left" \
         --pos_ms "$trackTime" \
-        --dur_ms "$$current_lengthlen" \
+        --dur_ms "$current_length" \
         --status "${icons[playing]}" \
         --image "/run/user/1000/album_cover.png" \
         --artist "$current_artist" \
@@ -464,11 +453,10 @@ get_json() {
     exit 0
 }
 
-# Основной поток выполнения
-#get_mopidy_player_metadata
-get_deadbeef_player_metadata
-get_mpv_player_metadata
-get_player_metadata
+# Основной поток выполнения - проверяем в порядке приоритета, выходим при первом успехе
+get_deadbeef_player_metadata && exit 0
+get_mpv_player_metadata && exit 0
+get_player_metadata && exit 0
 
 # Если ничего не играет
 get_json --image "$DEFAULT_IMG" --artist "silence"
