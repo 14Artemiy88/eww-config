@@ -1,3 +1,5 @@
+(defvar init_exec `scripts/init`)
+
 (include "src/_volumes.yuck")
 (include "src/_networks.yuck")
 (include "src/_player.yuck")
@@ -10,7 +12,6 @@
 (include "src/_weather_now.yuck")
 (include "src/_weather.yuck")
 (include "src/_timer.yuck")
-
 
 ( defwindow time
     :monitor "LCD195VXM+"

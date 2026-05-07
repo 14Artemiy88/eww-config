@@ -1,4 +1,5 @@
 (defvar show_calendar false)
+(defpoll weekday :interval "1h" "scripts/weekday")
 
 (defwidget datestuff []
     (box
@@ -25,7 +26,7 @@
             :onclick "eww update show_calendar=${!show_calendar};"
             {formattime(EWW_TIME, "%d.%m.%Y")}
         )
-        (box :class "day"  :halign "end" {formattime(EWW_TIME, "%A")} )
+        (box :class "day"  :halign "end" {weekday} )
   )
 )
 

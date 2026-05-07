@@ -11,75 +11,38 @@ declare -A icons=(
     ["Paused"]=""  ["paused"]=""
 )
 
-# Основная функция поиска обложки
-declare -A cover_cache  # Кэш путей к обложкам
+# Кэш путей к обложкам (в пределах одного вызова скрипта)
+declare -A cover_cache
 
 find_cover() {
-    local album_dir="$1"
-    local parent_dir
+    local album_dir="$1" parent_dir="${1%/*}" art found
+    local -a names=(cover folder artwork front albumart album image logo)
+    local -a exts=(jpg jpeg png bmp)
 
-    # Определяем родительский каталог
-    parent_dir=$(dirname "$album_dir")
-
-    # Быстрый поиск через предопределенные пути
-    local -a candidates=(
-        # Стандартные имена файлов
-        "cover.jpg" "folder.jpg" "artwork.jpg" "front.jpg"
-        "cover.png" "folder.png" "artwork.png" "front.png"
-        "cover.jpeg" "folder.jpeg" "artwork.jpeg" "front.jpeg"
-        "cover.bmp" "folder.bmp" "artwork.bmp" "front.bmp"
-
-        # Альтернативные имена и регистры
-        "Cover.jpg" "Folder.jpg" "Artwork.jpg" "Front.jpg"
-        "AlbumArt.jpg" "Album.jpg" "Image.jpg"
-
-        "logo.jpg"
-    )
-
-    # Проверка в текущем каталоге
-    for name in "${candidates[@]}"; do
-        local art="$album_dir/$name"
-        [[ -f "$art" ]] && { echo "$art"; return 0; }
+    # Проверка в текущем и родительском каталоге
+    for dir in "$album_dir" "$parent_dir"; do
+        for name in "${names[@]}"; do
+            for ext in "${exts[@]}"; do
+                art="$dir/$name.$ext"
+                [[ -f "$art" ]] && { printf '%s\n' "$art"; return 0; }
+            done
+        done
     done
 
-    # Проверка в родительском каталоге
-    for name in "${candidates[@]}"; do
-        local art="$parent_dir/$name"
-        [[ -f "$art" ]] && { echo "$art"; return 0; }
-    done
-
-    # Углубленный поиск в текущем каталоге
-    local found_art
-    found_art=$(find "$album_dir" -maxdepth 2 -type f \( \
-        -iname "*.jp*" -o \
-        -iname "*.png" -o \
-        -iname "*.bmp" \) \
+    # Fallback: find один раз для обоих каталогов
+    found=$(find "$album_dir" "$parent_dir" -maxdepth 2 -type f \( \
+        -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.bmp" \) \
         -print -quit 2>/dev/null)
 
-    if [[ -n "$found_art" ]]; then
-        echo "$found_art"
-        return 0
-    fi
-
-    # Углубленный поиск в родительском каталоге
-    found_art=$(find "$parent_dir" -maxdepth 2 -type f \( \
-        -iname "*.jp*" -o \
-        -iname "*.png" -o \
-        -iname "*.bmp" \) \
-        -print -quit 2>/dev/null)
-
-    if [[ -n "$found_art" ]]; then
-        echo "$found_art"
-        return 0
-    fi
-
-    # Ничего не найдено
+    [[ -n "$found" ]] && { printf '%s\n' "$found"; return 0; }
     return 1
 }
 
 escape_path() {
-    local path="$1"
-    printf '%s' "$path" | sed 's/[\\'"'"'"]/\\&/g'
+    local p="$1"
+    p="${p//\\/\\}"
+    p="${p//\'/\\\'}"
+    printf '%s\n' "${p//\"/\\\"}"
 }
 
 # Основная функция
@@ -120,52 +83,36 @@ get_album_img() {
     fi
 }
 
-# copy and resize image to destination - function called when needed
-copy_and_resize_image() {
-    local art="$1"
-    local cover="$2"
-    local size="${3:-200}"
-    ffmpeg -loglevel 0 -y -i "$art" -vf "scale=${size}:-1" "$cover" 2>/dev/null
-}
-
-
-# Создаем директорию для изображений, если не существует
-[[ ! -d "$IMG_PATH" ]] && mkdir -p "$IMG_PATH"
-
 is_youtube_video() {
-    local url title
+    local meta url title
+    meta=$(playerctl -p plasma-browser-integration metadata -f '{{xesam:url}}␞{{xesam:title}}' 2>/dev/null)
+    [[ -z "$meta" ]] && return 1
+    url="${meta%%␞*}"
+    title="${meta##*␞}"
 
-    url=$(playerctl -p plasma-browser-integration metadata -f '{{xesam:url}}' 2>/dev/null)
-    title=$(playerctl -p plasma-browser-integration metadata -f '{{xesam:title}}' 2>/dev/null)
-
-    # Проверка по URL
-    [[ "$url" == *"youtube.com/"* ]] && return 0
-    [[ "$url" == *"youtu.be/"* ]] && return 0
-    [[ "$url" == *"googlevideo.com/"* ]] && return 0
-    [[ "$url" == *"soundcloud.com/"* ]] && return 0
-
-    # Проверка по заголовку (для некоторых плееров)
-    [[ "$title" == *"YouTube"* ]] && return 0
-    [[ "$title" == *"- YouTube" ]] && return 0
-
+    case "$url" in
+        *"youtube.com/"*|*"youtu.be/"*|*"googlevideo.com/"*|*"soundcloud.com/"*) return 0 ;;
+    esac
+    case "$title" in
+        *"YouTube"*|*"- YouTube") return 0 ;;
+    esac
     return 1
 }
 
-# Функция для загрузки изображений
 get_image() {
-    local img_url="$1"
+    local img_url="$1" image_path
 
     # Возвращаем дефолтное изображение, если URL пустой
     if [[ -z "$img_url" ]]; then
         img_url=$(playerctl metadata -f '{{ mpris:artUrl }}' 2>/dev/null)
-        [[ -z "$img_url" ]] && { echo "$DEFAULT_IMG"; return; }
-        echo "${img_url#file://}"
+        [[ -z "$img_url" ]] && { printf '%s\n' "$DEFAULT_IMG"; return; }
+        printf '%s\n' "${img_url#file://}"
         return
     fi
 
     # Извлекаем имя файла из URL
-    local filename="${img_url##*/}"
-    local image_path="$IMG_PATH/${filename%.*}$IMG_SUFFIX"
+    image_path="$IMG_PATH/${img_url##*/}"
+    image_path="${image_path%.*}$IMG_SUFFIX"
 
     # Загружаем только если файл не существует
     if [[ ! -f "$image_path" ]]; then
@@ -173,7 +120,7 @@ get_image() {
         mogrify -format png "$image_path" 2>/dev/null
     fi
 
-    echo "$image_path"
+    printf '%s\n' "$image_path"
 }
 
 # Форматирование времени
@@ -268,10 +215,10 @@ get_mpv_player_metadata() {
     title="${title//\"/}"
 
     # Генерируем путь к изображению
-    local image_path="$IMG_PATH/${title}${IMG_SUFFIX}"
+    local image_path="$IMG_PATH/${title}${IMG_SUFFIX}" ts
 
-    # Создаем превью каждую минуту
-    if [[ ! -f "$image_path" || "$(find "$image_path" -mmin +1)" ]]; then
+    # Создаем превью если файла нет или старше 60 секунд
+    if [[ ! -f "$image_path" ]] || { read -r ts < <(stat -c %Y "$image_path" 2>/dev/null) && (( $(date +%s) - ts > 60 )); }; then
         ffmpeg -ss "$position" -i "$path" -vframes 1 -y "$image_path" 2>/dev/null
     fi
     [[ -f "$image_path" ]] || image_path="$DEFAULT_IMG"
@@ -291,17 +238,20 @@ get_mpv_player_metadata() {
 get_player_metadata() {
     local image="$DEFAULT_IMG"
     local service="$DEFAULT_TEXT"
-    local s="💩" # разделитель
-    local params="{{ title }}${s}{{ artist }}${s}{{ position }}${s}{{ mpris:length }}${s}-{{ duration(mpris:length - position) }}${s}{{ mpris:artUrl }}"
+    local s="␞"
+    local params='{{status}}'"${s}"'{{title}}'"${s}"'{{artist}}'"${s}"'{{position}}'"${s}"'{{mpris:length}}'"${s}"'-{{duration(mpris:length - position)}}'"${s}"'{{mpris:artUrl}}'
     local players=("org.telegram.desktop" "spotify" "plasma-browser-integration")
     local metadata status title artist position len timeleft img
 
     for player in "${players[@]}"; do
-        status=$(playerctl -p "$player" status 2>/dev/null)
-        [[ "$status" != "Playing" && "$player" == "org.telegram.desktop" ]] && continue
-
         metadata=$(playerctl -p "$player" metadata -f "$params" 2>/dev/null)
-        [[ -n "$metadata" ]] && break
+        [[ -z "$metadata" ]] && continue
+
+        status="${metadata%%␞*}"
+        metadata="${metadata#*␞}"
+
+        [[ "$player" == "org.telegram.desktop" && "$status" != "Playing" ]] && continue
+        break
     done
     [[ -z "$metadata" ]] && return
 
@@ -351,47 +301,39 @@ get_player_metadata() {
     fi
 }
 
-# Функция для получения метаданных DeadBeeF
+# Получение метаданных DeadBeeF
 get_deadbeef_player_metadata() {
-    # Проверяем, запущен ли DeadBeeF
     if ! pgrep -x deadbeef-main >/dev/null; then
         return
     fi
 
-    # Получаем статус воспроизведения
-    local status="Playing"
-    [[ $(deadbeef --nowplaying-tf "%ispaused%") == "1" ]] && status="Paused"
-
-    # Получаем метаданные трека
-    local title
+    local title status artist year album duration position timeleft file_path image_path meta
     title=$(deadbeef --nowplaying "%t" 2>/dev/null)
+    [[ "$title" == "nothing" ]] && return
 
-    if [[ "$title" == "nothing" ]]; then
-      return
-    fi
+    # Один вызов для всех остальных данных (tail -1 фильтрует "starting deadbeef...")
+    meta=$(deadbeef --nowplaying-tf '%ispaused%|%artist%|%year%|%album%|%length_seconds%|%playback_time_seconds%|-%playback_time_remaining%|%path%' 2>/dev/null | tail -1)
+    IFS='|' read -r status artist year album duration position timeleft file_path <<< "$meta"
 
-    local titleMetadata infoMetadata linesTitle artist duration position timeleft file_path image_path
-    titleMetadata=$(deadbeef --nowplaying "%a\n%y - %b" 2>/dev/null)
-    readarray -t linesTitle <<< "$(echo -e "${titleMetadata//\\\\n/\\n}")"
+    [[ "$status" == "1" ]] && status="Paused" || status="Playing"
 
-    infoMetadata=$(deadbeef --nowplaying-tf "%length_seconds%💩%playback_time_seconds%💩-%playback_time_remaining%💩%path%💩" 2>/dev/null)
-    IFS=$'💩' read -r -d '' duration position timeleft file_path _ <<< "$(echo -e "$infoMetadata")"
+    # Формируем строку альбома: "год - альбом" или просто альбом
+    [[ -n "$year" && "$year" != "0" ]] && album="$year - $album"
 
-    # Пытаемся извлечь обложку
     if [[ -f "$file_path" ]]; then
         image_path=$(get_album_img "$file_path")
     fi
 
     get_json \
         --first_line "$title" \
-        --second_line "${linesTitle[1]}" \
-        --third_line "${linesTitle[0]}" \
+        --second_line "$album" \
+        --third_line "$artist" \
         --timeleft "$timeleft" \
-        --pos_ms "$(awk "BEGIN {printf \"%.0f\", $position * 1000}")" \
-        --dur_ms "$(awk "BEGIN {printf \"%.0f\", $duration * 1000}")" \
+        --pos_ms "${position%%.*}000" \
+        --dur_ms "${duration%%.*}000" \
         --status "${icons[$status]}" \
         --image "$image_path" \
-        --artist "${linesTitle[0]}" \
+        --artist "$artist" \
         --player "deadbeef"
 }
 
@@ -453,10 +395,9 @@ get_json() {
     exit 0
 }
 
-# Основной поток выполнения - проверяем в порядке приоритета, выходим при первом успехе
-get_deadbeef_player_metadata && exit 0
-get_mpv_player_metadata && exit 0
-get_player_metadata && exit 0
+get_deadbeef_player_metadata
+get_mpv_player_metadata
+get_player_metadata
 
 # Если ничего не играет
 get_json --image "$DEFAULT_IMG" --artist "silence"

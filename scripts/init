@@ -1,0 +1,10 @@
+#!/bin/bash
+
+declare -r IMG_PATH="/run/user/1000/eww_player"
+declare -r TIMER_DIR="/run/user/1000/timer"
+
+# Создание всех необходимых директорий при старте eww
+[[ ! -d "$IMG_PATH" ]] && mkdir -p "$IMG_PATH"
+[[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
+
+echo "ok"

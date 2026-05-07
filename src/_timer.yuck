@@ -4,7 +4,9 @@
 (defvar custom_timer1 5)
 (defvar custom_timer2 7)
 (defvar custom_timer3 15)
-(defvar scroll "")
+(defvar scroll "up")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defwidget timerstuff []
     (box
@@ -30,45 +32,7 @@
     )
 )
 
-
-
-(defwidget timer [time]
-     (eventbox
-         :onscroll      "bash ${EWW_CONFIG_DIR}/scripts/timer {} '${time.file}'"
-         :onclick       "bash ${EWW_CONFIG_DIR}/scripts/timer update_color '${time.file}'"
-         :onrightclick  "eww update show_timer_options=${!show_timer_options};"
-         :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}' ; eww update show_timer_options=false"
-         :onhover       "eww update timer_options_file=${time.file} timer_options_color=${time.color} timer_options_time='${time.time_passed}'"
-
-     ;;    :style "background: ${time.color};"
-
-         (box
-             :orientation "hs"
-             :class "timer_box"
-             :tooltip "${time.time_passed}"
-             :space-evenly false
-             :halign "end"
-
-             (label
-                 :halign "end"
-                 :class "comment"
-                 :style "color: ${time.color};"
-                 :text "${time.comment}"
-             )
-             (label
-                 :halign "end"
-                 :class "timer"
-                 :text "${time.sign}${time.timer}"
-                 :style "${
-                     time.sign == '' ?
-                     'color: ${time.color};' :
-                     'color: #222; text-shadow: ${time.color} 1px 1px 0, ${time.color} -1px -1px 0, ${time.color} 1px -1px 0, ${time.color} -1px 1px 0;'
-                 }"
-             )
-
-         )
-     )
- )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defwidget show_set_timers []
     (eventbox
@@ -78,7 +42,7 @@
 
         (box
             :orientation "h"
-            :space-evenly "false"
+            :space-evenly false
             :spacing "2"
 
             (revealer
@@ -123,12 +87,54 @@
         (eventbox
             :class "set_timer"
             :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer add '${value}'"
-            :onscroll "eww update scroll={}; eww update custom_timer${id}=${scroll == 'up' ? value + 1 : (value > 0 ? value - 1 : 0)}"
-            :onmiddleclick "eww update custom_timer${id}=${default};"
+            :onscroll "eww update scroll={} custom_timer${id}=${scroll == 'up' ? value + 1 : (value > 0 ? value - 1 : 0)}"
+            :onmiddleclick "eww update custom_timer${id}=${default} scroll='up'"
             (label :text "${value}" )
         )
     )
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defwidget timer [time]
+     (eventbox
+         :onscroll      "bash ${EWW_CONFIG_DIR}/scripts/timer {} '${time.file}'"
+         :onclick       "bash ${EWW_CONFIG_DIR}/scripts/timer update_color '${time.file}'"
+   ;;      :onrightclick  "eww update show_timer_options=${!show_timer_options};"
+         :onrightclick  "eww update show_timer_options=${!show_timer_options} timer_options_file=${time.file}"
+         :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}' ; eww update show_timer_options=false"
+  ;;       :onhover       "eww update timer_options_file=${time.file} timer_options_color=${time.color} timer_options_time='${time.time_passed}'"
+         :onhover       "eww update timer_options_file=${time.file}"
+
+         (box
+             :orientation "hs"
+             :class "timer_box"
+             :tooltip "${time.time_passed}"
+             :space-evenly false
+             :halign "end"
+
+             (label
+                 :halign "end"
+                 :class "comment"
+                 :style "color: ${time.color};"
+                 :text "${time.comment}"
+             )
+             (label
+                 :halign "end"
+                 :class "timer"
+                 :text "${time.sign}${time.timer}"
+                 :style "${
+                     time.sign == '' ?
+                     'color: ${time.color};' :
+                     'color: #222; text-shadow: ${time.color} 1px 1px 0, ${time.color} -1px -1px 0, ${time.color} 1px -1px 0, ${time.color} -1px 1px 0;'
+                 }"
+             )
+
+         )
+     )
+ )
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -138,22 +144,20 @@
 (defvar timer_options_color "")
 (defvar timer_options_time "")
 
-(defwidget timer_option_button [icon action]
-    (button
-        :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer ${action} '${timer_options_file}'"
-        (label
-            :class "timer_options_button"
-            :style "color: ${timer_options_color};"
-            :text " ${icon}"
+(defwidget timer_options []
+    (box
+        (for time in {timer_list}
+            (timer_option :timer_info time)
         )
     )
-)
+ )
 
-(defwidget timer_options []
+(defwidget timer_option [timer_info]
      (revealer
-         :visible {show_timer_options}
+    ;;     :visible {show_timer_options}
+         :visible {show_timer_options && timer_info.file == timer_options_file}
          :transition "crossfade"
-         :reveal {show_timer_options}
+         :reveal {show_timer_options && timer_info.file == timer_options_file}
          :duration "1550ms"
 
          (box
@@ -164,14 +168,26 @@
 
             (label
                 :class "time_passed"
-                :text "${timer_options_time}"
-                :style "color: ${timer_options_color};"
+                :text "${timer_info.time_passed}"
+                :style "color: ${timer_info.color};"
             )
 
-            (timer_option_button :icon "󰃉" :action "comment")
-            (timer_option_button :icon "" :action "refresh")
-            (timer_option_button :icon "󰏤" :action "toggle_pause")
+            (timer_option_button :icon "󰃉" :color {timer_info.color} :action "comment")
+            (timer_option_button :icon "" :color {timer_info.color} :action "refresh")
+        ;;    (timer_option_button :icon "" :color {timer_info.color} :action "refresh_add")
+            (timer_option_button :icon "󰏤" :color {timer_info.color} :action "toggle_pause")
 
          )
      )
- )
+)
+
+(defwidget timer_option_button [icon color action]
+    (button
+        :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer ${action} '${timer_options_file}'"
+        (label
+            :class "timer_options_button"
+            :style "color: ${color};"
+            :text " ${icon}"
+        )
+    )
+)

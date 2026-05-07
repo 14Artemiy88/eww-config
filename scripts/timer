@@ -84,9 +84,6 @@ timer_delete() {
 }
 
 timer_add() {
-    # Создаем директорию для таймеров, если не существует
-    [[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
-
     local file now
     now=$(date '+%s')
     file="$TIMER_DIR/${now}_$RANDOM"
@@ -97,17 +94,6 @@ timer_add() {
 # Функция синтеза речи
 say() {
     [[ -n "$1" ]] && echo "$1" | festival --tts --language russian &>/dev/null
-}
-
-read_timer_file() {
-    local file="$1"
-    [[ -f "$file" ]] || return 1
-    read -r total_time end_time ding color paused_at comment < "$file"
-}
-
-write_timer_file() {
-    local file="$1"
-    echo "$total_time $end_time $ding $color $paused_at $comment" > "$file" || rm -f "$file"
 }
 
 get_color() {
@@ -186,8 +172,19 @@ refresh() {
     local file="$1"
     read_timer_file "$file" || return
 
-    end_time=$(date -d "+$total_time min" +%s)
 	  ding=0
+    end_time=$(date -d "+$total_time min" +%s)
+
+    write_timer_file "$file"
+}
+
+refresh_add() {
+    local file="$1"
+    read_timer_file "$file" || return
+
+	  ding=0
+    comment="$total_time"
+    end_time=$(date -d "+$total_time min" +%s)
 
     write_timer_file "$file"
 }
@@ -210,6 +207,18 @@ toggle_pause() {
     write_timer_file "$file"
 }
 
+read_timer_file() {
+    local file="$1"
+    [[ -f "$file" ]] || return 1
+    read -r total_time end_time ding color paused_at comment < "$file"
+}
+
+write_timer_file() {
+    local file="$1"
+    echo "$total_time $end_time $ding $color $paused_at $comment" > "$file" || rm -f "$file"
+}
+
+
 # Главная логика
 case "$1" in
     add)          timer_add "$2" "$3";;
@@ -220,6 +229,7 @@ case "$1" in
     set_color)    set_color "$2" "$3" ;;
     comment)      comment "$2" ;;
     refresh)      refresh "$2" ;;
+    refresh_add)  refresh_add "$2" ;;
     toggle_pause) toggle_pause "$2" ;;
     *)            timer ;;
 esac
