@@ -1,4 +1,4 @@
-(defpoll timer_list :interval "1s" `scripts/timer`)
+(deflisten timer_list :initial "[]" `scripts/timer`)
 
 (defvar show_set_timers false)
 (defvar custom_timer1 5)
