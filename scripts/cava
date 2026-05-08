@@ -1,13 +1,13 @@
 #!/bin/bash
-exec cava -p /dev/stdin <<'CAVA'
+exec cava -p /dev/stdin <<'CAVA' | sed -u 's/;//g'
 [general]
-framerate=10
-bars=51
+framerate=1
+bars=1
 [output]
 method=raw
 raw_target=/dev/stdout
 data_format=ascii
 ascii_max_range=70
 channels=mono
-noise_reduction=0
+noise_reduction=0.5
 CAVA

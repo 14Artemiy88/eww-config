@@ -1,9 +1,9 @@
 #!/bin/bash
 
-STATE_CPU="/run/user/1000/eww_cpu_graph"
 STATE_NET="/run/user/1000/eww_net"
-LINES=51
-
+CACHE_NET="/run/user/1000/eww_net_cache"
+CACHE_NET_TIME="/run/user/1000/eww_net_cache_time"
+TMPD=$(mktemp -d)
 
 # --- NET state ---
 prev_up=0 prev_down=0
@@ -11,21 +11,17 @@ if [[ -f "$STATE_NET" ]]; then
     read -r prev_up prev_down < "$STATE_NET"
 fi
 
-# --- helpers ---
 fmt_bytes() {
     local b="${1:-0}"
     b="${b%%.*}"
-    if (( b >= 1099511627776 )); then bc <<< "scale=2; $b / 1099511627776" | xargs printf "%.2f TB\n"
-    elif (( b >= 1073741824 )); then bc <<< "scale=2; $b / 1073741824" | xargs printf "%.2f GB\n"
-    elif (( b >= 1048576 )); then bc <<< "scale=2; $b / 1048576" | xargs printf "%.2f MB\n"
-    elif (( b >= 1024 )); then bc <<< "scale=2; $b / 1024" | xargs printf "%.2f KB\n"
+    if (( b >= 1099511627776 )); then env LC_NUMERIC=C printf "%.2f TB\n" "$(LC_NUMERIC=C bc <<< "scale=2; $b / 1099511627776")"
+    elif (( b >= 1073741824 )); then env LC_NUMERIC=C printf "%.2f GB\n" "$(LC_NUMERIC=C bc <<< "scale=2; $b / 1073741824")"
+    elif (( b >= 1048576 )); then env LC_NUMERIC=C printf "%.2f MB\n" "$(LC_NUMERIC=C bc <<< "scale=2; $b / 1048576")"
+    elif (( b >= 1024 )); then env LC_NUMERIC=C printf "%.2f KB\n" "$(LC_NUMERIC=C bc <<< "scale=2; $b / 1024")"
     else printf "%s B\n" "$b"
     fi
 }
 
-# --- get_cpu ---
-
-# --- get_net ---
 get_net() {
     local line new_up new_down
     while IFS= read -r line; do
@@ -43,7 +39,7 @@ get_net() {
     (( sd < 0 )) && sd=0
     (( su < 0 )) && su=0
 
-    printf '{"down":"%s","up":"%s","speed_down":"%s","speed_up":"%s"}\n' \
+    printf '{"down":"%s","up":"%s","speed_down":"%s","speed_up":"%s"}' \
         "$(fmt_bytes "$new_down")" \
         "$(fmt_bytes "$new_up")" \
         "$(fmt_bytes "$sd")" \
@@ -52,7 +48,39 @@ get_net() {
     printf '%s %s\n' "$new_up" "$new_down" > "$STATE_NET"
 }
 
-# --- get_volumes ---
+get_top_apps() {
+    local -a cpu_entries=() mem_entries=()
+    local line pid pcpu rss comm i v
+
+    while IFS= read -r line && (( ${#cpu_entries[@]} < 5 )); do
+        read -r pid pcpu comm <<< "$line"
+        [[ -z "$pid" ]] && break
+        cpu_entries+=("{\"name\":\"$comm\",\"value\":\"$pcpu%\",\"pid\":\"$pid\"}")
+    done < <(ps --no-header -eo pid,pcpu,comm --sort=-pcpu | head -5)
+
+    while IFS= read -r line && (( ${#mem_entries[@]} < 5 )); do
+        read -r pid rss comm <<< "$line"
+        [[ -z "$pid" ]] && break
+        v=$rss
+        if (( v >= 1048576 )); then v="$(LC_NUMERIC=C bc <<< "scale=1; $v/1048576") Gb"
+        elif (( v >= 1024 )); then v="$(LC_NUMERIC=C bc <<< "scale=1; $v/1024") Mb"
+        else v="$v Kb"
+        fi
+        mem_entries+=("{\"name\":\"$comm\",\"value\":\"$v\",\"pid\":\"$pid\"}")
+    done < <(ps --no-header -eo pid,rss,comm --sort=-rss | head -5)
+
+    local cjson="" mjson=""
+    for ((i=0; i<${#cpu_entries[@]}; i++)); do
+        [[ -n "$cjson" ]] && cjson="$cjson,"
+        cjson="$cjson${cpu_entries[i]}"
+    done
+    for ((i=0; i<${#mem_entries[@]}; i++)); do
+        [[ -n "$mjson" ]] && mjson="$mjson,"
+        mjson="$mjson${mem_entries[i]}"
+    done
+    printf '{"cpu":[%s],"mem":[%s]}' "$cjson" "$mjson"
+}
+
 get_volumes() {
     local data num vol name items=()
     data=$(pactl list sink-inputs 2>/dev/null | awk '
@@ -73,7 +101,7 @@ get_volumes() {
         END { if (num != "" && vol != "" && name != "") { print num; print vol; print name } }
     ')
 
-    [[ -z "$data" ]] && { echo "[]"; return; }
+    if [[ -z "$data" ]]; then printf "[]"; return; fi
 
     local -a arr=()
     while IFS= read -r line; do arr+=("$line"); done <<< "$data"
@@ -87,12 +115,11 @@ get_volumes() {
     done
 
     if (( ${#items[@]} > 0 )); then
-        printf "["
-        printf "%s" "${items[0]}"
-        for ((i=1; i<${#items[@]}; i++)); do printf ",%s" "${items[i]}"; done
-        printf "]\n"
+        local json="${items[0]}"
+        for ((i=1; i<${#items[@]}; i++)); do json="$json,${items[i]}"; done
+        printf "[%s]" "$json"
     else
-        echo "[]"
+        printf "[]"
     fi
 }
 
@@ -101,7 +128,19 @@ get_current_volume() {
 }
 
 get_network() {
-    nmcli -g NAME,TYPE,DEVICE c 2>/dev/null | awk -F: '
+    local now
+    now=$(date +%s)
+    if [[ -f "$CACHE_NET_TIME" ]]; then
+        local t
+        read -r t < "$CACHE_NET_TIME"
+        if (( now - t < 5 )) && [[ -f "$CACHE_NET" ]]; then
+            cat "$CACHE_NET"
+            return
+        fi
+    fi
+
+    local result
+    result=$(nmcli -g NAME,TYPE,DEVICE c 2>/dev/null | awk -F: '
     BEGIN {
         icons["vpn"] = "󰒘"; icons["802-3-ethernet"] = "󰈀"; icons["wifi"] = "󰖩"
         icons["802-11-wireless"] = ""; icons["bluetooth"] = ""; icons["bridge"] = "󰡨"
@@ -115,50 +154,33 @@ get_network() {
         printf "{\"name\":\"%s\",\"type\":\"%s\",\"status\":\"%s\"}", $1, icon, status
         sep = 1
     }
-    END { printf "]\n" }'
+    END { printf "]" }')
+
+    printf '%s\n' "$result" > "$CACHE_NET"
+    printf '%s\n' "$now" > "$CACHE_NET_TIME"
+    printf '%s\n' "$result"
 }
 
-get_top_apps() {
-    ps -eo pid,pcpu,rss,comm --no-headers 2>/dev/null | awk '
-    {
-        pid[NR] = $1; cpu[NR] = $2 + 0; mem[NR] = $3 + 0; name[NR] = $4
-    }
-    END {
-        for (i = 1; i <= 5; i++) {
-            max = -1; idx = 0
-            for (j = 1; j <= NR; j++) if (cpu[j] > max) { max = cpu[j]; idx = j }
-            if (max <= 0) break
-            cjson = cjson (i > 1 ? "," : "") "{\"name\":\"" name[idx] "\",\"value\":\"" cpu[idx] "%\",\"pid\":\"" pid[idx] "\"}"
-            cpu[idx] = -1
-        }
-        for (i = 1; i <= 5; i++) {
-            max = -1; idx = 0
-            for (j = 1; j <= NR; j++) if (mem[j] > max) { max = mem[j]; idx = j }
-            if (max <= 0) break
-            v = mem[idx]
-            if (v >= 1000000) v = sprintf("%.1f Gb", v / 1000000)
-            else if (v >= 1000) v = sprintf("%.1f Mb", v / 1000)
-            else v = v " Kb"
-            mjson = mjson (i > 1 ? "," : "") "{\"name\":\"" name[idx] "\",\"value\":\"" v "\",\"pid\":\"" pid[idx] "\"}"
-            mem[idx] = -1
-        }
-        print "{\"cpu\":[" cjson "],\"mem\":[" mjson "]}"
-    }'
-}
+# --- parallel execution ---
+get_net > "$TMPD/net" &
+get_top_apps > "$TMPD/top" &
+get_volumes > "$TMPD/vol" &
+get_current_volume > "$TMPD/cur" &
+get_network > "$TMPD/netw" &
+wait
 
-# --- single output ---
 jq -n \
-    \
-    --argjson top_apps "$(get_top_apps)" \
-    --argjson net_stat "$(get_net)" \
-    --argjson volumes "$(get_volumes)" \
-    --argjson current_volume "$(get_current_volume || echo 0)" \
-    --argjson network "$(get_network)" \
+    --argjson top_apps "$(cat "$TMPD/top")" \
+    --argjson net_stat "$(cat "$TMPD/net")" \
+    --argjson volumes "$(cat "$TMPD/vol")" \
+    --argjson current_volume "$(cat "$TMPD/cur" || echo 0)" \
+    --argjson network "$(cat "$TMPD/netw")" \
     '{
-        
         top_apps: $top_apps,
         net_stat: $net_stat,
         volumes: $volumes,
         current_volume: $current_volume,
         network: $network
     }'
+
+rm -rf "$TMPD"

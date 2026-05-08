@@ -20,7 +20,7 @@
             :text {
             	player.image == "" ||
             	player.image == "images/1px.png" ||
-            	player.image == "/run/user/1000/album_cover.png" ? player.text : ""
+            	player.image == "/run/user/1000/album_cover.png" ? player.text : player.first_line
            	}
         )
 
