@@ -1,0 +1,164 @@
+#!/bin/bash
+
+STATE_CPU="/run/user/1000/eww_cpu_graph"
+STATE_NET="/run/user/1000/eww_net"
+LINES=51
+
+
+# --- NET state ---
+prev_up=0 prev_down=0
+if [[ -f "$STATE_NET" ]]; then
+    read -r prev_up prev_down < "$STATE_NET"
+fi
+
+# --- helpers ---
+fmt_bytes() {
+    local b="${1:-0}"
+    b="${b%%.*}"
+    if (( b >= 1099511627776 )); then bc <<< "scale=2; $b / 1099511627776" | xargs printf "%.2f TB\n"
+    elif (( b >= 1073741824 )); then bc <<< "scale=2; $b / 1073741824" | xargs printf "%.2f GB\n"
+    elif (( b >= 1048576 )); then bc <<< "scale=2; $b / 1048576" | xargs printf "%.2f MB\n"
+    elif (( b >= 1024 )); then bc <<< "scale=2; $b / 1024" | xargs printf "%.2f KB\n"
+    else printf "%s B\n" "$b"
+    fi
+}
+
+# --- get_cpu ---
+
+# --- get_net ---
+get_net() {
+    local line new_up new_down
+    while IFS= read -r line; do
+        case "$line" in
+            *:\ *)
+                read -r _ new_down _ _ _ _ _ _ _ new_up _ <<< "$line"
+                ;;
+        esac
+    done < /proc/net/dev
+    new_down="${new_down:-0}"
+    new_up="${new_up:-0}"
+
+    local sd=$((new_down - prev_down))
+    local su=$((new_up - prev_up))
+    (( sd < 0 )) && sd=0
+    (( su < 0 )) && su=0
+
+    printf '{"down":"%s","up":"%s","speed_down":"%s","speed_up":"%s"}\n' \
+        "$(fmt_bytes "$new_down")" \
+        "$(fmt_bytes "$new_up")" \
+        "$(fmt_bytes "$sd")" \
+        "$(fmt_bytes "$su")"
+
+    printf '%s %s\n' "$new_up" "$new_down" > "$STATE_NET"
+}
+
+# --- get_volumes ---
+get_volumes() {
+    local data num vol name items=()
+    data=$(pactl list sink-inputs 2>/dev/null | awk '
+        /Вход аудиоприёмника №[0-9]+/ {
+            if (num != "" && vol != "" && name != "") {
+                print num; print vol; print name
+            }
+            num = $0; sub(/.*№/, "", num)
+            vol = ""; name = ""; reset = 1
+        }
+        /Громкость:/ && reset {
+            split($0, p, " ")
+            for (i in p) if (p[i] ~ /[0-9]+%/) { vol = p[i]; sub(/%/, "", vol); break }
+        }
+        /media.name =/ && reset {
+            name = $0; sub(/.*media.name = "/, "", name); sub(/".*/, "", name); reset = 0
+        }
+        END { if (num != "" && vol != "" && name != "") { print num; print vol; print name } }
+    ')
+
+    [[ -z "$data" ]] && { echo "[]"; return; }
+
+    local -a arr=()
+    while IFS= read -r line; do arr+=("$line"); done <<< "$data"
+
+    for ((i=0; i<${#arr[@]}; i+=3)); do
+        num="${arr[i]}"; vol="${arr[i+1]}"; name="${arr[i+2]}"
+        [[ -z "$num" || -z "$vol" || -z "$name" ]] && continue
+        name="${name//\\/\\\\}"
+        name="${name//\"/\\\"}"
+        items+=("{\"num\":\"$num\",\"value\":\"$vol\",\"name\":\"$name\"}")
+    done
+
+    if (( ${#items[@]} > 0 )); then
+        printf "["
+        printf "%s" "${items[0]}"
+        for ((i=1; i<${#items[@]}; i++)); do printf ",%s" "${items[i]}"; done
+        printf "]\n"
+    else
+        echo "[]"
+    fi
+}
+
+get_current_volume() {
+    amixer -D pulse sget Master 2>/dev/null | awk -F"[][]" '/Left:/ { if (/on\]/) { gsub(/%/, "", $2); print $2; exit } }'
+}
+
+get_network() {
+    nmcli -g NAME,TYPE,DEVICE c 2>/dev/null | awk -F: '
+    BEGIN {
+        icons["vpn"] = "󰒘"; icons["802-3-ethernet"] = "󰈀"; icons["wifi"] = "󰖩"
+        icons["802-11-wireless"] = ""; icons["bluetooth"] = ""; icons["bridge"] = "󰡨"
+        icons["tun"] = "󱠾"; icons["wireguard"] = "󰠥"
+        printf "["
+    }
+    $2 != "tun" && $2 != "bridge" && $2 != "loopback" {
+        status = ($3 == "") ? "off" : "on"
+        icon = ($2 in icons) ? icons[$2] : ""
+        if (sep) printf ","
+        printf "{\"name\":\"%s\",\"type\":\"%s\",\"status\":\"%s\"}", $1, icon, status
+        sep = 1
+    }
+    END { printf "]\n" }'
+}
+
+get_top_apps() {
+    ps -eo pid,pcpu,rss,comm --no-headers 2>/dev/null | awk '
+    {
+        pid[NR] = $1; cpu[NR] = $2 + 0; mem[NR] = $3 + 0; name[NR] = $4
+    }
+    END {
+        for (i = 1; i <= 5; i++) {
+            max = -1; idx = 0
+            for (j = 1; j <= NR; j++) if (cpu[j] > max) { max = cpu[j]; idx = j }
+            if (max <= 0) break
+            cjson = cjson (i > 1 ? "," : "") "{\"name\":\"" name[idx] "\",\"value\":\"" cpu[idx] "%\",\"pid\":\"" pid[idx] "\"}"
+            cpu[idx] = -1
+        }
+        for (i = 1; i <= 5; i++) {
+            max = -1; idx = 0
+            for (j = 1; j <= NR; j++) if (mem[j] > max) { max = mem[j]; idx = j }
+            if (max <= 0) break
+            v = mem[idx]
+            if (v >= 1000000) v = sprintf("%.1f Gb", v / 1000000)
+            else if (v >= 1000) v = sprintf("%.1f Mb", v / 1000)
+            else v = v " Kb"
+            mjson = mjson (i > 1 ? "," : "") "{\"name\":\"" name[idx] "\",\"value\":\"" v "\",\"pid\":\"" pid[idx] "\"}"
+            mem[idx] = -1
+        }
+        print "{\"cpu\":[" cjson "],\"mem\":[" mjson "]}"
+    }'
+}
+
+# --- single output ---
+jq -n \
+    \
+    --argjson top_apps "$(get_top_apps)" \
+    --argjson net_stat "$(get_net)" \
+    --argjson volumes "$(get_volumes)" \
+    --argjson current_volume "$(get_current_volume || echo 0)" \
+    --argjson network "$(get_network)" \
+    '{
+        
+        top_apps: $top_apps,
+        net_stat: $net_stat,
+        volumes: $volumes,
+        current_volume: $current_volume,
+        network: $network
+    }'

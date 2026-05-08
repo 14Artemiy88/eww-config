@@ -1,5 +1,3 @@
-(defpoll networks :interval "1s" "scripts/network")
-
 (defwidget networkstuff []
     (scroll
         :hscroll false
@@ -12,7 +10,7 @@
             :space-evenly false
             :halign "start"
 
-            (for entry in networks
+            (for entry in {system_monitor.network}
                 (buttons :value entry)
             )
         )

@@ -1,5 +1,3 @@
-(defpoll netstat :interval "1s" `scripts/net_stat` )
-
 (defwidget networkstatstuff []
     (box
         :orientation "v"
@@ -10,13 +8,13 @@
             :orientation "h"
             :class "totalup"
              (label :class "icon"  :halign "start" :text "")
-             (label :class "label" :halign "end"   :text "${netstat.speed_up} / ${netstat.up}")
+             (label :class "label" :halign "end"   :text "${system_monitor.net_stat.speed_up} / ${system_monitor.net_stat.up}")
          )
         (box
             :orientation "h"
             :class "totaldown"
             (label :class "icon"  :halign "start" :text "")
-            (label :class "label" :halign "end"   :text "${netstat.speed_down} / ${netstat.down}")
+            (label :class "label" :halign "end"   :text "${system_monitor.net_stat.speed_down} / ${system_monitor.net_stat.down}")
          )
     )
 )

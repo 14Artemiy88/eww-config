@@ -1,4 +1,4 @@
-(defpoll cpu_graph :interval "1s" "scripts/cpu_graph")
+(deflisten cpu_graph `scripts/cpu_graph_daemon`)
 
 (defwidget cpugraphstuff []
     (box

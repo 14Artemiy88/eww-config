@@ -1,12 +1,10 @@
-(defpoll top_app :interval "1s" "scripts/top_apps")
-
 (defwidget topstuff []
     (box
         :class "topstuff"
         :orientation "v"
       ;;  :space-evenly false
-        (appslist :values {top_app.cpu} )
-        (appslist :values {top_app.mem} )
+        (appslist :values {system_monitor.top_apps.cpu} )
+        (appslist :values {system_monitor.top_apps.mem} )
     )
 )
 
