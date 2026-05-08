@@ -23,29 +23,30 @@ fmt_bytes() {
 }
 
 get_net() {
-    local line new_up new_down
-    while IFS= read -r line; do
-        case "$line" in
-            *:\ *)
-                read -r _ new_down _ _ _ _ _ _ _ new_up _ <<< "$line"
-                ;;
-        esac
-    done < /proc/net/dev
-    new_down="${new_down:-0}"
-    new_up="${new_up:-0}"
+    local result cd cu sd su
+    result=$(awk -v pd="$prev_down" -v pu="$prev_up" '
+        NR>2 {
+            gsub(/:/, "")
+            if ($1 != "lo") {
+                cd += $2; cu += $10
+            }
+        }
+        END {
+            sd = cd - pd; if (sd < 0) sd = 0
+            su = cu - pu; if (su < 0) su = 0
+            print cd, cu, sd, su
+        }
+    ' /proc/net/dev)
 
-    local sd=$((new_down - prev_down))
-    local su=$((new_up - prev_up))
-    (( sd < 0 )) && sd=0
-    (( su < 0 )) && su=0
+    read -r cd cu sd su <<< "$result"
 
     printf '{"down":"%s","up":"%s","speed_down":"%s","speed_up":"%s"}' \
-        "$(fmt_bytes "$new_down")" \
-        "$(fmt_bytes "$new_up")" \
+        "$(fmt_bytes "$cd")" \
+        "$(fmt_bytes "$cu")" \
         "$(fmt_bytes "$sd")" \
         "$(fmt_bytes "$su")"
 
-    printf '%s %s\n' "$new_up" "$new_down" > "$STATE_NET"
+    printf '%s %s\n' "$cu" "$cd" > "$STATE_NET"
 }
 
 get_top_apps() {
@@ -124,7 +125,7 @@ get_volumes() {
 }
 
 get_current_volume() {
-    amixer -D pulse sget Master 2>/dev/null | awk -F"[][]" '/Left:/ { if (/on\]/) { gsub(/%/, "", $2); print $2; exit } }'
+    amixer -D pulse sget Master 2>/dev/null | awk -F"[][]" '/Left:/ { if (/on\]/) { gsub(/%/, "", $2); print $2; exit } if (/off\]/) { print 0; exit } }'
 }
 
 get_network() {
