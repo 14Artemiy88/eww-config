@@ -4,6 +4,7 @@
 (include "src/_volumes.yuck")
 (include "src/_networks.yuck")
 (include "src/_player.yuck")
+(include "src/_cava.yuck")
 
 (include "src/_date.yuck")
 (include "src/_cpu.yuck")
@@ -125,6 +126,13 @@
     (volumestuff)
 )
 
+( defwindow cava
+    :monitor "LCD195VXM+"
+    :geometry ( geometry :x "330" :y "305" :anchor "top left" )
+    :stacking "bottom"
+
+    (cavastuff)
+)
 
 ( defwindow player
     :monitor "LCD195VXM+"

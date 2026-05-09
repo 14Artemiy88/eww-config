@@ -1,8 +1,9 @@
 #!/bin/bash
-exec cava -p /dev/stdin <<'CAVA' | sed -u 's/;//g'
+
+exec cava -p /dev/stdin <<'CAVA' | sed -u 's/;$//; s/;/,/g' | awk '{print "[" $0 "]"; fflush()}'
 [general]
-framerate=1
-bars=1
+framerate=60
+bars=33
 [output]
 method=raw
 raw_target=/dev/stdout

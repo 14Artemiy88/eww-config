@@ -1,4 +1,3 @@
-; (deflisten values :initial "0,0,0,0,0,0,0,0,0,0,0,0,0,0" `scripts/cava`)
 (defpoll player :interval "1s" "scripts/player")
 
 (defwidget playerstuff []
@@ -24,7 +23,6 @@
            	}
         )
 
- ;;     (cavastuff)
 
         ( box :halign "start" :orientation "v"
             (label  :class "button" :text {player.status} )
@@ -43,21 +41,6 @@
            :value { player.position ?: 0}
            :onchange "scripts/player_pausing position {}"
         )
+
     )
 )
-
-
-
-;; (defwidget cavastuff []
-;;     (box
-;;         :class "cava"
-;;         :orientation "h"
-;;
-;;         (for val in "${search(values, '[0-9]+')}"
-;;            (box
-;;                :class "bar"
-;;                :style "margin-top: ${100-val}px;"
-;;            )
-;;         )
-;;     )
-;; )
