@@ -9,7 +9,7 @@
             :class "volume_box"
             :space-evenly false
             :orientation "h"
-            (label :class "icon" :halign "start" :text {system_monitor.current_volume != "" ? '󰕾' : '󰖁' } )
+            (label :class "icon" :halign "start" :text {system_monitor.current_volume != 0 ? '󰕾' : '󰖁' } )
             (scale
                 :class "volume main_volume"
                 :value {system_monitor.current_volume ?: 0}

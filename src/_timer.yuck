@@ -17,24 +17,14 @@
         :halign "start"
         :width 315
 
-        (show_set_timers)
-
-        (box
-            :orientation "v"
-            :halign "end"
-      ;;       :space-evenly false
-         :style "min-width: 150px"
-             
-            (for time in {timer_list}
-                (timer :time time)
-            )
-        )
+        (timers_buttons)
+        (timers)
     )
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defwidget show_set_timers []
+(defwidget timers_buttons []
     (eventbox
         :onhover "eww update show_set_timers=true"
         :onhoverlost "eww update show_set_timers=false"
@@ -59,24 +49,21 @@
                 :reveal {show_set_timers}
                 :duration "550ms"
 
-                (timer_buttons)
+                (box :class "timer_buttons"
+                     :orientation "h"
+                     :space-evenly true
+                     :halign "start"
+                     :spacing 10
+
+                    (timer_button :id 1 :value custom_timer1 :default 5)
+                    (timer_button :id 2 :value custom_timer2 :default 7)
+                    (timer_button :id 3 :value custom_timer3 :default 15)
+                )
             )
         )
     )
 )
 
-(defwidget timer_buttons []
-    (box :class "timer_buttons"
-         :orientation "h"
-         :space-evenly true
-         :halign "start"
-         :spacing 10
-
-        (timer_button :id 1 :value custom_timer1 :default 5)
-        (timer_button :id 2 :value custom_timer2 :default 7)
-        (timer_button :id 3 :value custom_timer3 :default 15)
-    )
-)
 
 (defwidget timer_button [id value default]
     (box
@@ -97,18 +84,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+(defwidget timers []
+    (box
+        :orientation "v"
+        :style "min-width: 150px"
+
+        (for time in {timer_list}
+            (timer :time time)
+        )
+    )
+)
+
 (defwidget timer [time]
      (eventbox
          :onscroll      "bash ${EWW_CONFIG_DIR}/scripts/timer {} '${time.file}'"
          :onclick       "bash ${EWW_CONFIG_DIR}/scripts/timer update_color '${time.file}'"
-   ;;      :onrightclick  "eww update show_timer_options=${!show_timer_options};"
-         :onrightclick  "eww update show_timer_options=${!show_timer_options} timer_options_file=${time.file}"
-         :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}' ; eww update show_timer_options=false"
-  ;;       :onhover       "eww update timer_options_file=${time.file} timer_options_color=${time.color} timer_options_time='${time.time_passed}'"
+         :onrightclick  "eww update show_timer_options=${!show_timer_options}"
          :onhover       "eww update timer_options_file=${time.file}"
+         :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}' ; eww update show_timer_options=false"
 
          (box
-             :orientation "hs"
+             :orientation "h"
              :class "timer_box"
              :tooltip "${time.time_passed}"
              :space-evenly false
@@ -141,8 +137,6 @@
 
 (defvar show_timer_options false)
 (defvar timer_options_file "")
-(defvar timer_options_color "")
-(defvar timer_options_time "")
 
 (defwidget timer_options []
     (box
@@ -174,8 +168,8 @@
 
             (timer_option_button :icon "󰃉" :color {timer_info.color} :action "comment")
             (timer_option_button :icon "" :color {timer_info.color} :action "refresh")
-        ;;    (timer_option_button :icon "" :color {timer_info.color} :action "refresh_add")
             (timer_option_button :icon "󰏤" :color {timer_info.color} :action "toggle_pause")
+        ;;    (timer_option_button :icon "" :color {timer_info.color} :action "refresh_add")
 
          )
      )

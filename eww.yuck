@@ -1,4 +1,4 @@
-(defvar init_exec `scripts/init`)
+(defpoll init_exec :interval "1h" `scripts/init`)
 (defpoll system_monitor :interval "1s" `scripts/system_monitor`)
 
 (include "src/_volumes.yuck")
