@@ -134,7 +134,7 @@ get_network() {
     if [[ -f "$CACHE_NET_TIME" ]]; then
         local t
         read -r t < "$CACHE_NET_TIME"
-        if (( now - t < 5 )) && [[ -f "$CACHE_NET" ]]; then
+        if (( now - t < 2 )) && [[ -f "$CACHE_NET" ]]; then
             cat "$CACHE_NET"
             return
         fi

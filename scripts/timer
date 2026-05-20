@@ -3,6 +3,11 @@
 TIMER_DIR="/run/user/1000/timer"
 MESSAGE="динь-динь"
 
+declare -r IMG_PATH="/run/user/1000/eww_player"
+declare -r TIMER_DIR="/run/user/1000/timer"
+
+
+
 # Кэш данных таймеров (только для daemon mode)
 declare -A t_mtime
 # Храним все поля одним массивом: total_time:end_time:ding:color:paused_at:comment
@@ -112,6 +117,11 @@ timer_delete() {
 }
 
 timer_add() {
+	# Создание всех необходимых директорий при старте eww
+	[[ ! -d "$IMG_PATH" ]] && mkdir -p "$IMG_PATH"
+	[[ ! -d "$TIMER_DIR" ]] && mkdir -p "$TIMER_DIR"
+
+
     local file now
     now=$(date '+%s')
     file="$TIMER_DIR/${now}_$RANDOM"

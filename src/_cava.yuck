@@ -6,7 +6,7 @@
         :orientation "v"
         :space-evenly false
         :halign "start"
-        :width 313
+        :width 300
 
         (cava_bars :flipped true)
         (cava_bars :flipped false)
@@ -19,16 +19,17 @@
       (box
              :class "cpu_graph_segments"
 
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[0]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[1]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[2]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[3]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[4]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[5]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[6]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[7]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[8]} )
-            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[9]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[0]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[1]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[2]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[3]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[4]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[5]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[6]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[7]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[8]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[9]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[10]} )
             (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[11]} )
             (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[12]} )
             (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[13]} )
@@ -51,5 +52,23 @@
             (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[30]} )
             (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[31]} )
             (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[32]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[33]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[34]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[35]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[36]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[37]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[38]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[39]} )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[40]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[41]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[42]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[43]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[44]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[45]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[46]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[47]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[48]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[49]}  )
+            (scale :orientation "v" :flipped flipped :class "cpu_graph_segment" :value {cava_values[50]} )
          )
 )

@@ -76,6 +76,7 @@
             :onclick "bash ${EWW_CONFIG_DIR}/scripts/timer add '${value}'"
             :onscroll "eww update scroll={} custom_timer${id}=${scroll == 'up' ? value + 1 : (value > 0 ? value - 1 : 0)}"
             :onmiddleclick "eww update custom_timer${id}=${default} scroll='up'"
+
             (label :text "${value}" )
         )
     )
@@ -98,8 +99,8 @@
 (defwidget timer [time]
      (eventbox
          :onscroll      "bash ${EWW_CONFIG_DIR}/scripts/timer {} '${time.file}'"
-         :onclick       "bash ${EWW_CONFIG_DIR}/scripts/timer update_color '${time.file}'"
-         :onrightclick  "eww update show_timer_options=${!show_timer_options}"
+         :onclick       "eww update show_timer_options=${!show_timer_options}"
+         :onrightclick  "bash ${EWW_CONFIG_DIR}/scripts/timer update_color '${time.file}'"
          :onhover       "eww update timer_options_file=${time.file}"
          :onmiddleclick "bash ${EWW_CONFIG_DIR}/scripts/timer delete '${time.file}' ; eww update show_timer_options=false"
 

@@ -7,6 +7,7 @@ declare -A PLAYER_COMMANDS=(
     ["mpv"]='echo "{ \"command\": [\"cycle\", \"pause\"] }" | socat - "$MPV_SOCKET"'
     ["org.telegram.desktop"]="playerctl -p \"%s\" play-pause"
     ["plasma-browser-integration"]="playerctl -p %s play-pause"
+    ["spotify"]="playerctl -p %s play-pause"
     ["mopidy"]="mopidy playpauseexit 0"
     ['deadbeef']="deadbeef --toggle-pause"
 )
