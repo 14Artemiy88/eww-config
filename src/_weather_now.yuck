@@ -31,10 +31,14 @@
         (box
         	:class "right_part"
             :orientation "v"
-            :width 100
+            :width 120
             :space-evenly false
 
-            (box :orientation "h" :halign "end"
+            (box
+                :orientation "h"
+                :halign "end"
+                :space-evenly true
+
                 (label :class "wind_arrow" :halign "end" :text {arrows[weather.wind.direction.scale_8]} )
                 (label :class "wind_speed" :halign "end" :text {weather.wind.speed.m_s} )
                 (label :class "wind_unit"  :halign "end" :text "m/c" )
@@ -46,7 +50,6 @@
             (label
                 :class "description"
                 :halign "end"
-              ;;  :valign "start"
                 :limit-width 16
                 :show-truncated false
                 :tooltip {weather.description.full}

@@ -1,6 +1,8 @@
 (defpoll init_exec :interval "1h" "scripts/init")
 (defpoll system_monitor :interval "1s" `scripts/system_monitor`)
 
+(include "src/_closer.yuck")
+
 (include "src/_volumes.yuck")
 (include "src/_networks.yuck")
 (include "src/_player.yuck")
@@ -44,7 +46,7 @@
 
 ( defwindow top
     :monitor "LCD195VXM+"
-    :geometry ( geometry :anchor "top left" :x "5" :y "322" :width "315" :height "0" )
+    :geometry ( geometry :anchor "top left" :x "5" :y "322" :width "313" :height "0" )
     :stacking "bottom"
 
     (topstuff)
@@ -53,7 +55,7 @@
 
 ( defwindow networkstat
     :monitor "LCD195VXM+"
-    :geometry ( geometry :anchor "top left" :x "5" :y "526" :width "315" :height "0" )
+    :geometry ( geometry :anchor "top left" :x "5" :y "526" :width "313" :height "0" )
     :stacking "bottom"
 
     (networkstatstuff)
@@ -128,7 +130,7 @@
 
 ( defwindow cava
     :monitor "LCD195VXM+"
-    :geometry ( geometry :x "330" :y "305" :anchor "top left" )
+    :geometry ( geometry :x "325" :y "578" :anchor "top left" )
     :stacking "bottom"
 
     (cavastuff)
@@ -145,7 +147,7 @@
 
 ( defwindow networks
     :monitor "LCD195VXM+"
-    :geometry ( geometry :x "331" :y "575" :anchor "top left" )
+    :geometry ( geometry :x "331" :y "675" :anchor "top left" )
     :stacking "bottom"
 
     (networkstuff)

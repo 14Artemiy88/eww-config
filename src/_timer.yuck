@@ -6,7 +6,7 @@
 (defvar custom_timer3 15)
 (defvar scroll "up")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;; TIMERSTUFF ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defwidget timerstuff []
     (box
@@ -22,7 +22,8 @@
     )
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;; TIMERS_BUTTONS ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defwidget timers_buttons []
     (eventbox
@@ -82,8 +83,8 @@
     )
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;;;;;;;;; TIMERS ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defwidget timers []
     (box
@@ -107,8 +108,7 @@
          (box
              :orientation "h"
              :class "timer_box"
-             :tooltip "${time.time_passed}"
-             :space-evenly false
+             :space-evenly true
              :halign "end"
 
              (label
@@ -133,8 +133,7 @@
  )
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;;;;;;;;;;;;;;;;;;;;;;;;; TIMER_OPTIONS ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar show_timer_options false)
 (defvar timer_options_file "")
@@ -145,11 +144,10 @@
             (timer_option :timer_info time)
         )
     )
- )
+)
 
 (defwidget timer_option [timer_info]
      (revealer
-    ;;     :visible {show_timer_options}
          :visible {show_timer_options && timer_info.file == timer_options_file}
          :transition "crossfade"
          :reveal {show_timer_options && timer_info.file == timer_options_file}

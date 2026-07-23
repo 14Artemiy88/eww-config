@@ -51,12 +51,10 @@ run_daemon() {
                 display_now=$paused_at
             fi
 
-            seconds_left=$((end_time - display_now))
-
-            sign=""
-            (( seconds_left < 0 )) && sign=" + "
-
-            if (( seconds_left <= 0 && ding == 0 )); then
+            local seconds_left=$((end_time - display_now))
+            local sign=""
+            (( total_time > 0  && seconds_left < 0 )) && sign=" + "
+            if (( total_time > 0  && seconds_left <= 0 && ding == 0 )); then
                 ding=1
                 t_data["$file"]="$total_time:$end_time:$ding:$color:$paused_at:$comment"
                 write_timer_file "$file"
@@ -66,15 +64,16 @@ run_daemon() {
 
             [[ -z "$comment" ]] && comment="$total_time"
 
-            time_passed=$(format_time $((total_time * 60 - seconds_left)))
-
-            if (( paused_at > 0 )); then
-                timer_str="PAUSED"
-            else
+            local timer_str="PAUSED"
+            if (( paused_at == 0 )); then
                 timer_str=$(format_time ${seconds_left#-})
             fi
 
-            timers+=("{\"file\":\"$file\", \"comment\":\"$comment\", \"timer\":\"$timer_str\", \"color\":\"#$color\", \"sign\":\"$sign\", \"time_passed\":\"$time_passed\"}")
+            time_passed=$(format_time $((total_time * 60 - seconds_left)))
+
+            timers+=(
+              "{\"file\":\"$file\", \"comment\":\"$comment\", \"timer\":\"$timer_str\", \"color\":\"#$color\", \"sign\":\"$sign\", \"time_passed\":\"$time_passed\"}"
+            )
         done
 
         # Удаляем из кэша файлы, которых больше нет
@@ -133,18 +132,27 @@ say() {
 }
 
 get_color() {
-    local hash r g b
+    local hash r g b sum minSum=300
+
     hash=$(printf '%s' "$(date '+%s')$RANDOM" | md5sum | cut -c1-6)
     r=$((0x${hash:0:2}))
     g=$((0x${hash:2:2}))
     b=$((0x${hash:4:2}))
-    (( r < 96 )) && r=$((r + 96))
-    (( g < 96 )) && g=$((g + 96))
-    (( b < 96 )) && b=$((b + 96))
+
+    sum=$((r + g + b))
+
+    if (( sum < minSum )); then
+        local diff=$(( (minSum - sum) / 3 + 1 ))
+        r=$(( r + diff ))
+        g=$(( g + diff ))
+        b=$(( b + diff ))
+    fi
+
     (( r > 255 )) && r=255
     (( g > 255 )) && g=255
     (( b > 255 )) && b=255
-    printf '%02x%02x%02x' "$r" "$g" "$b"
+
+    printf '%02x%02x%02x\n' "$r" "$g" "$b"
 }
 
 format_time() {

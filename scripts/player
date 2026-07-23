@@ -197,7 +197,7 @@ get_mpv_player_metadata() {
     [[ ! -S "$mpvsocket" ]] && return
 
     local mpv_data title position duration path remaining timeleft
-    # Получаем данные за один запрос
+    
     mpv_data=$(socat - "$mpvsocket" <<< $'{"command": ["get_property_string", "media-title"], "request_id": 1}\n{"command": ["get_property", "time-pos"], "request_id": 2}\n{"command": ["get_property", "duration"], "request_id": 3}\n{"command": ["get_property", "path"], "request_id": 4}')
 
     title=$(jq -r 'select(.request_id == 1) | .data' <<< "$mpv_data")
