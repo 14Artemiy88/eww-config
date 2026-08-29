@@ -86,16 +86,14 @@ get_album_img() {
 is_youtube_video() {
     local meta url title
     meta=$(playerctl -p plasma-browser-integration metadata -f '{{xesam:url}}␞{{xesam:title}}' 2>/dev/null)
+    [[ -z "$meta" ]] && meta=$(playerctl -p spotify metadata -f '{{xesam:url}}␞{{xesam:title}}' 2>/dev/null)
     [[ -z "$meta" ]] && return 1
     url="${meta%%␞*}"
-    title="${meta##*␞}"
 
     case "$url" in
-        *"youtube.com/"*|*"youtu.be/"*|*"googlevideo.com/"*|*"soundcloud.com/"*) return 0 ;;
+        *"youtube.com/"*|*"youtu.be/"*|*"googlevideo.com/"*|*"soundcloud.com/"*|*"spotify.com/"*) return 0 ;;
     esac
-    case "$title" in
-        *"YouTube"*|*"- YouTube") return 0 ;;
-    esac
+
     return 1
 }
 

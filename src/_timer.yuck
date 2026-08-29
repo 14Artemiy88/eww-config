@@ -92,12 +92,12 @@
         :style "min-width: 150px"
 
         (for time in {timer_list}
-            (timer :time time)
+            (timer :time time :count "${arraylength(timer_list)}" )
         )
     )
 )
 
-(defwidget timer [time]
+(defwidget timer [time count]
      (eventbox
          :onscroll      "bash ${EWW_CONFIG_DIR}/scripts/timer {} '${time.file}'"
          :onclick       "eww update show_timer_options=${!show_timer_options}"
@@ -119,7 +119,7 @@
              )
              (label
                  :halign "end"
-                 :class "timer"
+                 :class "timer count${count}"
                  :text "${time.sign}${time.timer}"
                  :style "${
                      time.sign == '' ?

@@ -1,0 +1,5 @@
+(defwidget closer[]
+  (eventbox :onclick "eww update show_timer_options=false")
+)
+
+

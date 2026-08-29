@@ -17,6 +17,20 @@
 (include "src/_weather.yuck")
 (include "src/_timer.yuck")
 
+
+
+(defwindow popup_closer
+  :monitor "LCD195VXM+"
+  :geometry (geometry :x "0%" :y "0%" :width "100%" :height "100%")
+
+    :stacking "bg"
+    :focusable false
+
+  (closer)
+)
+
+
+
 ( defwindow time
     :monitor "LCD195VXM+"
     :geometry ( geometry :anchor "top left" :x "3" :y "5" :width "315" :height "0" )
@@ -118,7 +132,7 @@
     )
 )
 
-;; ВТОРАЯ КОЛОНКА
+;;;;;;;;;;;; ВТОРАЯ КОЛОНКА ;;;;;;;;;;;;
 
 ( defwindow volumes
     :monitor "LCD195VXM+"
