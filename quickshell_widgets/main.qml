@@ -1,7 +1,7 @@
 // Quickshell виджеты на основе EWW конфига
 // Запуск: qs shell
 
-import { Clock, DateWidget, CpuMonitor, VolumeControl, CavaVisualizer, PlayerWidget } from "./widgets";
+import { Clock, DateWidget, CpuMonitor, VolumeControl, CavaVisualizer, PlayerWidget, WeatherWidget } from "./widgets";
 
 export default () => (
   <box space={10} className="eww-container">
@@ -20,5 +20,8 @@ export default () => (
     
     {/* Музыкальный плеер */}
     <PlayerWidget />
+    
+    {/* Погода */}
+    <WeatherWidget />
   </box>
 );

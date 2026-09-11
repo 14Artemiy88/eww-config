@@ -212,3 +212,38 @@
 .play-btn:hover {
   background: rgba(107, 92, 231, 0.5);
 }
+
+/* ПОГОДА */
+.weather-widget {
+  background: linear-gradient(135deg, rgba(0, 198, 255, 0.2), rgba(0, 150, 200, 0.3));
+  border-radius: 10px;
+  padding: 10px 15px;
+  min-width: 120px;
+  spacing: 8px;
+}
+
+.weather-widget.loading {
+  background: rgba(0, 0, 0, 0.3);
+  min-height: 60px;
+}
+
+.weather-widget .wi {
+  font-size: 32px;
+  color: #ffffff;
+}
+
+.weather-widget .temp {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.weather-widget .location {
+  font-size: 12px;
+  color: #dfe6e9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Weather Icons Font (необходимо установить separately) */
+@import url('https://cdn.jsdelivr.net/npm/weather-icons-css/css/weather-icons.css');
