@@ -219,3 +219,157 @@ export const CavaVisualizer = () => {
     </box>
   );
 };
+
+// ==================== МУЗЫКАЛЬНЫЙ ПЛЕЕР ====================
+
+export const PlayerWidget = () => {
+  const title = Reactive.value("");
+  const artist = Reactive.value("");
+  const album = Reactive.value("");
+  const coverArt = Reactive.value("");
+  const position = Reactive.value(0);
+  const length = Reactive.value(0);
+  const playing = Reactive.value(false);
+  const shuffle = Reactive.value(false);
+  const loopStatus = Reactive.value<"None" | "Track" | "Playlist">("None");
+
+  const updatePlayer = async () => {
+    try {
+      // Получаем информацию о треке
+      const titleResult = await execAsync("playerctl metadata title 2>/dev/null || echo ''");
+      const artistResult = await execAsync("playerctl metadata artist 2>/dev/null || echo ''");
+      const albumResult = await execAsync("playerctl metadata album 2>/dev/null || echo ''");
+      const statusResult = await execAsync("playerctl status 2>/dev/null || echo 'Stopped'");
+      const positionResult = await execAsync("playerctl position 2>/dev/null || echo '0'");
+      const lengthResult = await execAsync("playerctl metadata mpris:length 2>/dev/null || echo '0'");
+      const shuffleResult = await execAsync("playerctl shuffle 2>/dev/null || echo 'Off'");
+      const loopResult = await execAsync("playerctl loop 2>/dev/null || echo 'None'");
+      
+      // Получаем обложку альбома
+      let coverUrl = "";
+      try {
+        coverUrl = await execAsync("playerctl metadata mpris:artUrl 2>/dev/null || echo ''");
+        coverUrl = coverUrl.trim();
+      } catch (e) {
+        coverUrl = "";
+      }
+
+      title.set(titleResult.trim() || "Нет трека");
+      artist.set(artistResult.trim() || "Неизвестный исполнитель");
+      album.set(albumResult.trim() || "");
+      coverArt.set(coverUrl);
+      playing.set(statusResult.trim() === "Playing");
+      
+      const pos = parseInt(positionResult) || 0;
+      const len = parseInt(lengthResult) || 0;
+      position.set(pos / 1000000); // конвертируем из микросекунд в секунды
+      length.set(len / 1000000);
+      
+      shuffle.set(shuffleResult.trim() === "On");
+      loopStatus.set(loopResult.trim() as any || "None");
+    } catch (e) {
+      console.error("Error getting player info:", e);
+      title.set("Нет трека");
+      artist.set("");
+      album.set("");
+      coverArt.set("");
+      playing.set(false);
+      position.set(0);
+      length.set(0);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const togglePlayPause = async () => {
+    await execAsync("playerctl play-pause");
+    playing.set(!playing());
+  };
+
+  const nextTrack = async () => {
+    await execAsync("playerctl next");
+  };
+
+  const prevTrack = async () => {
+    await execAsync("playerctl previous");
+  };
+
+  const toggleShuffle = async () => {
+    await execAsync("playerctl shuffle");
+    shuffle.set(!shuffle());
+  };
+
+  const cycleLoop = async () => {
+    await execAsync("playerctl loop");
+    const newLoop = loopStatus() === "None" ? "Track" : loopStatus() === "Track" ? "Playlist" : "None";
+    loopStatus.set(newLoop);
+  };
+
+  const seekTo = async (value: number) => {
+    const microseconds = Math.floor(value * 1000000);
+    await execAsync(`playerctl position ${microseconds}`);
+    position.set(value);
+  };
+
+  updatePlayer();
+  const interval = setInterval(updatePlayer, 1000); // Обновление каждую секунду
+  onCleanup(() => clearInterval(interval));
+
+  return (
+    <box className="player-widget" orientation="vertical" space={8}>
+      {/* Обложка и информация */}
+      <box space={10}>
+        {coverArt() && (
+          <image 
+            className="album-cover" 
+            file={coverArt().replace("file://", "")}
+            pixelSize={60}
+          />
+        )}
+        <box orientation="vertical" space={4} vexpand={true}>
+          <label className="track-title" text={title()} ellipsize="end" />
+          <label className="track-artist" text={artist()} ellipsize="end" />
+          {album() && <label className="track-album" text={album()} ellipsize="end" />}
+        </box>
+      </box>
+
+      {/* Прогресс бар */}
+      <box space={5}>
+        <label className="time-label" text={formatTime(position())} />
+        <slider
+          className="progress-slider"
+          value={length() > 0 ? position() / length() : 0}
+          onChange={(v) => seekTo(v * length())}
+          min={0}
+          max={1}
+          step={0.001}
+          hexpand={true}
+        />
+        <label className="time-label" text={formatTime(length())} />
+      </box>
+
+      {/* Кнопки управления */}
+      <box space={10} halign="center">
+        <button onClick={toggleShuffle} className="control-btn">
+          <label text={shuffle() ? "🔀" : "🔁"} opacity={shuffle() ? 1 : 0.5} />
+        </button>
+        <button onClick={prevTrack} className="control-btn">
+          <label text="⏮️" />
+        </button>
+        <button onClick={togglePlayPause} className="control-btn play-btn">
+          <label text={playing() ? "⏸️" : "▶️"} />
+        </button>
+        <button onClick={nextTrack} className="control-btn">
+          <label text="⏭️" />
+        </button>
+        <button onClick={cycleLoop} className="control-btn">
+          <label text={loopStatus() === "None" ? "🔂" : loopStatus() === "Track" ? "🔂" : "🔁"} opacity={loopStatus() !== "None" ? 1 : 0.5} />
+        </button>
+      </box>
+    </box>
+  );
+};

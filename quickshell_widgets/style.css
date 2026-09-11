@@ -126,3 +126,89 @@
     #a29bfe 50%, 
     #6c5ce7 100%);
 }
+
+/* МУЗЫКАЛЬНЫЙ ПЛЕЕР */
+.player-widget {
+  background: rgba(107, 92, 231, 0.25);
+  border-radius: 12px;
+  padding: 15px;
+  min-width: 300px;
+}
+
+.album-cover {
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.track-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  max-width: 200px;
+}
+
+.track-artist {
+  font-size: 14px;
+  color: #dfe6e9;
+  max-width: 200px;
+}
+
+.track-album {
+  font-size: 12px;
+  color: #b2bec3;
+  max-width: 200px;
+}
+
+.time-label {
+  font-size: 11px;
+  color: #b2bec3;
+  font-family: monospace;
+}
+
+.progress-slider {
+  min-height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.progress-slider trough {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.progress-slider highlight {
+  background: linear-gradient(90deg, #6b5ce7, #a29bfe);
+  border-radius: 3px;
+}
+
+.progress-slider slider {
+  background: #a29bfe;
+  border-radius: 50%;
+  min-width: 12px;
+  min-height: 12px;
+}
+
+.control-btn {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.control-btn:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.play-btn {
+  background: rgba(107, 92, 231, 0.3);
+}
+
+.play-btn:hover {
+  background: rgba(107, 92, 231, 0.5);
+}
