@@ -1,0 +1,323 @@
+/* Quickshell Widgets Styles - аналог EWW SCSS */
+
+/* === ОБЩИЕ СТИЛИ === */
+* {
+    all: unset;
+    font-family: "JetBrains Mono", "Roboto Mono", monospace;
+}
+
+/* === ЧАСЫ И ДАТА === */
+.clock-widget {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.time-label {
+    font-size: 55px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.date-widget {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+}
+
+.date-label {
+    font-size: 25px;
+    color: #e0e0e0;
+}
+
+.weekday-label {
+    font-size: 15px;
+    color: #b0b0b0;
+    margin-top: 5px;
+}
+
+/* === CPU МОНИТОР === */
+.cpu-monitor {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 12px;
+    spacing: 8px;
+}
+
+.cpu-label,
+.ram-label {
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.cpu-progress {
+    min-height: 8px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.cpu-bar {
+    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    min-height: 8px;
+    border-radius: 4px;
+}
+
+/* === ГРОМКОСТЬ === */
+.volume-control {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 12px;
+    spacing: 10px;
+}
+
+.volume-icon {
+    font-size: 24px;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.volume-slider {
+    min-height: 20px;
+    slider {
+        min-width: 15px;
+        min-height: 15px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    trough {
+        border-radius: 10px;
+        background-color: rgba(255, 255, 255, 0.2);
+        min-height: 10px;
+    }
+    highlight {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+    }
+}
+
+/* === CAVA ВИЗУАЛИЗАТОР === */
+.cava-visualizer {
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 12px;
+    min-height: 100px;
+    spacing: 2px;
+}
+
+.cava-bar {
+    background: linear-gradient(180deg, 
+        #ff0000 0%, 
+        #ffff00 30%, 
+        #00ff00 60%, 
+        #00ffff 100%);
+    border-radius: 3px;
+    min-width: 4px;
+}
+
+/* === ПОГОДА === */
+.weather-now,
+.weather-day,
+.weather-week {
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 12px;
+    spacing: 15px;
+}
+
+.weather-temp {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.weather-desc {
+    font-size: 14px;
+    color: #cccccc;
+}
+
+.weather-wind {
+    font-size: 14px;
+    color: #aaaaaa;
+}
+
+.weather-day-list,
+.weather-week-list {
+    spacing: 10px;
+}
+
+.weather-item,
+.weather-day-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 8px;
+    border-radius: 8px;
+    spacing: 5px;
+}
+
+.weather-time {
+    font-size: 12px;
+    color: #888888;
+}
+
+.weather-temp,
+.weather-temp-max,
+.weather-temp-min {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+/* === ПЛЕЕР === */
+.player-widget {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 12px;
+    spacing: 10px;
+}
+
+.player-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.player-artist {
+    font-size: 14px;
+    color: #aaaaaa;
+}
+
+.player-controls {
+    spacing: 15px;
+    button {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        min-width: 40px;
+        min-height: 40px;
+        padding: 0;
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        label {
+            font-size: 18px;
+            color: #ffffff;
+        }
+    }
+}
+
+.player-progress {
+    slider {
+        min-width: 12px;
+        min-height: 12px;
+        border-radius: 50%;
+        background: #ff6b6b;
+    }
+    trough {
+        border-radius: 6px;
+        background-color: rgba(255, 255, 255, 0.2);
+        min-height: 6px;
+    }
+    highlight {
+        background: linear-gradient(90deg, #ff6b6b 0%, #feca57 100%);
+        border-radius: 6px;
+    }
+}
+
+/* === ТОП ПРИЛОЖЕНИЙ === */
+.top-apps {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 12px;
+    spacing: 12px;
+}
+
+.top-cpu,
+.top-mem {
+    spacing: 6px;
+}
+
+.top-header {
+    font-size: 14px;
+    font-weight: bold;
+    color: #4facfe;
+}
+
+.top-app-item {
+    font-size: 12px;
+    color: #e0e0e0;
+    font-family: monospace;
+}
+
+/* === КАЛЕНДАРЬ === */
+.calendar-widget {
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 12px;
+}
+
+calendar {
+    color: #ffffff;
+    &:selected {
+        background-color: #4facfe;
+        color: #ffffff;
+        border-radius: 6px;
+    }
+    &:indeterminate {
+        color: #666666;
+    }
+    header {
+        font-weight: bold;
+        color: #4facfe;
+    }
+    button {
+        background-color: transparent;
+        color: #ffffff;
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+    }
+}
+
+/* === МЕНЮ ПИТАНИЯ === */
+.power-menu {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 12px;
+    spacing: 20px;
+}
+
+.power-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    min-width: 50px;
+    min-height: 50px;
+    padding: 0;
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    label {
+        font-size: 28px;
+    }
+}
+
+/* === ГЛАВНЫЙ КОНТЕЙНЕР === */
+.main-container {
+    spacing: 10px;
+    padding: 10px;
+}
+
+.row {
+    spacing: 10px;
+}
