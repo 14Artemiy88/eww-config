@@ -8,15 +8,19 @@ Port of EWW widgets to Noctalia format.
 noctalia/
 ├── src/
 │   ├── _clock_date.yuck    # Clock and date widget definitions
-│   └── _cpu_widgets.yuck   # CPU load and graph widget definitions
+│   ├── _cpu_widgets.yuck   # CPU load and graph widget definitions
+│   └── _top_apps.yuck      # Top applications by CPU and memory usage
 ├── styles/
 │   ├── _variables.scss     # Shared SCSS variables
 │   ├── clock_date.scss     # Clock and date widget styles
-│   └── cpu_widgets.scss    # CPU load and graph widget styles
+│   ├── cpu_widgets.scss    # CPU load and graph widget styles
+│   └── top_apps.scss       # Top applications widget styles
 ├── scripts/
 │   ├── get_cpu_cores       # Script to get per-core CPU usage
 │   ├── get_ram_usage       # Script to get RAM usage percentage
-│   └── cpu_graph_daemon    # Script for CPU graph historical data
+│   ├── cpu_graph_daemon    # Script for CPU graph historical data
+│   ├── get_top_cpu_apps    # Script to get top apps by CPU usage
+│   └── get_top_mem_apps    # Script to get top apps by memory usage
 └── README.md
 ```
 
@@ -135,4 +139,56 @@ Edit `styles/cpu_widgets.scss` to modify:
 - Bar dimensions and spacing
 - Graph appearance
 - Font sizes and families
+
+## Top Applications Widget
+
+The top applications widget displays the most resource-intensive processes:
+
+### Features
+- **Top CPU Apps**: Shows 5 applications with highest CPU usage
+- **Top Memory Apps**: Shows 5 applications with highest memory usage
+- **Auto-refresh**: Updates every 2 seconds
+- **Compact Display**: Name and value in a clean list format
+
+### Usage
+
+```rust
+// In your main noctalia config, include the widget:
+include!("src/_top_apps.yuck");
+
+// Use the widget in your layout:
+widget: top_apps_widget
+```
+
+### Styling
+
+The widget uses the following CSS classes:
+- `.topstuff` - Main container
+- `.top_app` - Individual app list section
+- `.name` - Application name label
+- `.value` - Usage value label
+
+### Scripts
+
+Two helper scripts are required:
+
+1. **get_top_cpu_apps**: Returns JSON array of top 5 apps by CPU usage
+2. **get_top_mem_apps**: Returns JSON array of top 5 apps by memory usage
+
+Each script returns data in the format:
+```json
+[
+  {"name": "firefox", "value": "15.3%"},
+  {"name": "code", "value": "8.7%"},
+  ...
+]
+```
+
+### Customization
+
+Edit `styles/top_apps.scss` to modify:
+- Minimum width (default: 293px)
+- Padding and margins
+- Font sizes and families
+- Text alignment
 
