@@ -373,3 +373,91 @@ export const PlayerWidget = () => {
     </box>
   );
 };
+
+// ==================== ПОГОДА ====================
+
+export const WeatherWidget = () => {
+  const [weatherData, setWeatherData] = useState<{
+    temp: number;
+    condition: string;
+    location: string;
+    icon: string;
+  } | null>(null);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        // 1. Get Location via IP (Privacy-friendly, no key needed for basic)
+        const locRes = await fetch('https://ipapi.co/json/');
+        const locData = await locRes.json();
+        const { latitude, longitude, city } = locData;
+
+        // 2. Get Weather from Open-Meteo
+        const weatherRes = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&windspeed_unit=ms`
+        );
+        const weatherJson = await weatherRes.json();
+        const current = weatherJson.current_weather;
+
+        // Map WMO codes to icons/text
+        let icon = 'wi-day-sunny';
+        let condition = 'Clear';
+        const code = current.weathercode;
+
+        if (code === 0) { icon = 'wi-day-sunny'; condition = 'Clear'; }
+        else if (code <= 3) { icon = 'wi-cloudy'; condition = 'Cloudy'; }
+        else if (code <= 48) { icon = 'wi-fog'; condition = 'Fog'; }
+        else if (code <= 67) { icon = 'wi-rain'; condition = 'Rain'; }
+        else if (code <= 77) { icon = 'wi-snow'; condition = 'Snow'; }
+        else if (code <= 82) { icon = 'wi-rain'; condition = 'Showers'; }
+        else if (code <= 99) { icon = 'wi-thunderstorm'; condition = 'Thunderstorm'; }
+
+        // Night check
+        const isNight = current.time.includes('T') && 
+          (parseInt(current.time.split('T')[1].split(':')[0]) < 6 || 
+           parseInt(current.time.split('T')[1].split(':')[0]) > 18);
+        
+        if (isNight && icon === 'wi-day-sunny') icon = 'wi-night-clear';
+        if (isNight && icon === 'wi-cloudy') icon = 'wi-night-alt-cloudy';
+
+        setWeatherData({
+          temp: Math.round(current.temperature),
+          condition,
+          location: city || 'Unknown',
+          icon
+        });
+        setLoading(false);
+      } catch (e) {
+        console.error('Weather fetch error:', e);
+        setLoading(false);
+      }
+    };
+
+    fetchWeather();
+    // Update every 30 mins
+    const interval = setInterval(fetchWeather, 1800000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <box className="weather-widget loading">
+        <label>Loading...</label>
+      </box>
+    );
+  }
+
+  if (!weatherData) return null;
+
+  return (
+    <box className="weather-widget">
+      <label className={`wi ${weatherData.icon}`} />
+      <box vertical>
+        <label className="temp">{weatherData.temp}°C</label>
+        <label className="location">{weatherData.location}</label>
+      </box>
+    </box>
+  );
+};
