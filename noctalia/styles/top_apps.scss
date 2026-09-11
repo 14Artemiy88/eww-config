@@ -1,0 +1,24 @@
+// Noctalia Top Applications Styles
+// Ported from eww config
+
+.topstuff {
+  @extend .stuff;
+}
+
+.top_app {
+  min-width: 293px;
+  padding: 5px 10px;
+  margin: 5px 0 0;
+  font-size: 12px;
+  
+  .name {
+    font-family: $DEFAULT;
+    halign: start;
+  }
+  
+  .value {
+    font-family: $DEFAULT;
+    halign: end;
+  }
+}
+
