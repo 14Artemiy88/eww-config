@@ -1,0 +1,96 @@
+// Noctalia CPU Load and Graph Styles
+// Ported from eww config
+
+.cpu-load-widget,
+.cpu-graph-widget {
+  @extend .stuff;
+  padding: 5px 0 4px;
+  margin: 5px 0 0;
+}
+
+// Metric bar styles
+.metric {
+  padding: 0 10px;
+
+  .label {
+    font-family: $DEFAULT;
+    font-size: 12px;
+  }
+}
+
+// CPU bar colors matching original config
+$cpu-colors: (
+  CPU1: (#ffb4bb, rgba(255, 180, 187, 0.3)),
+  CPU2: (#ffe0ba, rgba(255, 224, 186, 0.3)),
+  CPU3: (#fffebb, rgba(255, 254, 187, 0.3)),
+  CPU4: (#baffc9, rgba(186, 255, 201, 0.3)),
+  CPU5: (#bae1ff, rgba(186, 225, 255, 0.3)),
+  CPU6: (#aedfdb, rgba(174, 223, 219, 0.3)),
+  CPU7: (#75c8cc, rgba(117, 200, 204, 0.3)),
+  CPU8: (#ead1f5, rgba(234, 209, 245, 0.3)),
+  RAM: (#3daee9, rgba(61, 174, 233, 0.3))
+);
+
+.cpustuffBar {
+  trough {
+    border-radius: 50px;
+    min-height: 8px;
+    min-width: 267px;
+    margin-left: 10px;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+
+    highlight {
+      border-radius: 10px;
+    }
+  }
+}
+
+// Individual CPU core colors
+@each $class, $colors in $cpu-colors {
+  $color: nth($colors, 1);
+  $bg: nth($colors, 2);
+
+  .#{$class} trough {
+    background-color: $bg;
+
+    highlight {
+      background-color: $color;
+    }
+  }
+}
+
+// RAM bar spacing
+.RAM {
+  margin-top: 5px;
+}
+
+// CPU Graph styles
+.cpu_graph_segments {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+
+  .cpu_graph_segment {
+    min-height: 35px;
+    min-width: 6px;
+    margin-top: 0;
+
+    trough {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+
+      highlight {
+        background: $accent-color;
+        border-radius: 2px;
+      }
+    }
+  }
+}
+
+// Graph top and bottom sections
+.graph-top,
+.graph-bottom {
+  display: flex;
+  justify-content: space-between;
+}

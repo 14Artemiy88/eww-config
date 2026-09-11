@@ -1,0 +1,181 @@
+// Noctalia Widget Configuration - CPU Load and Graph
+// Ported from eww config
+
+// ============================================
+// CPU Load Widget (per-core usage bars)
+// ============================================
+widget cpu_load {
+    type: "box"
+    class: ["cpu-load-widget", "side-widget"]
+    orientation: "vertical"
+    halign: "start"
+    space-evenly: false
+    
+    children: [
+        // Core 1
+        {
+            type: "metric_bar"
+            class: ["CPU1"]
+            label: " "
+            value: { source: "cpu_cores[0]", interval: "1s" }
+        },
+        // Core 2
+        {
+            type: "metric_bar"
+            class: ["CPU2"]
+            label: " "
+            value: { source: "cpu_cores[1]", interval: "1s" }
+        },
+        // Core 3
+        {
+            type: "metric_bar"
+            class: ["CPU3"]
+            label: " "
+            value: { source: "cpu_cores[2]", interval: "1s" }
+        },
+        // Core 4
+        {
+            type: "metric_bar"
+            class: ["CPU4"]
+            label: " "
+            value: { source: "cpu_cores[3]", interval: "1s" }
+        },
+        // Core 5
+        {
+            type: "metric_bar"
+            class: ["CPU5"]
+            label: " "
+            value: { source: "cpu_cores[4]", interval: "1s" }
+        },
+        // Core 6
+        {
+            type: "metric_bar"
+            class: ["CPU6"]
+            label: " "
+            value: { source: "cpu_cores[5]", interval: "1s" }
+        },
+        // Core 7
+        {
+            type: "metric_bar"
+            class: ["CPU7"]
+            label: " "
+            value: { source: "cpu_cores[6]", interval: "1s" }
+        },
+        // Core 8
+        {
+            type: "metric_bar"
+            class: ["CPU8"]
+            label: " "
+            value: { source: "cpu_cores[7]", interval: "1s" }
+        },
+        // RAM
+        {
+            type: "metric_bar"
+            class: ["RAM"]
+            label: " "
+            value: { source: "ram_usage", interval: "1s" }
+        }
+    ]
+}
+
+// ============================================
+// CPU Graph Widget (historical usage graph)
+// ============================================
+widget cpu_graph_widget {
+    type: "box"
+    class: ["cpu-graph-widget", "side-widget"]
+    orientation: "vertical"
+    halign: "start"
+    space-evenly: false
+    width: 313
+    
+    children: [
+        // Flipped graph (top half)
+        {
+            type: "graph_segment"
+            class: ["graph-top"]
+            flipped: true
+            data: { source: "cpu_graph_data", interval: "1s" }
+        },
+        // Normal graph (bottom half)
+        {
+            type: "graph_segment"
+            class: ["graph-bottom"]
+            flipped: false
+            data: { source: "cpu_graph_data", interval: "1s" }
+        }
+    ]
+}
+
+// ============================================
+// Data Sources
+// ============================================
+
+// CPU cores usage (array of 8 cores)
+source cpu_cores {
+    type: "script"
+    command: "scripts/get_cpu_cores"
+    interval: "1s"
+    output_format: "json_array"
+}
+
+// RAM usage percentage
+source ram_usage {
+    type: "script"
+    command: "scripts/get_ram_usage"
+    interval: "1s"
+    output_format: "number"
+}
+
+// CPU graph historical data (array of 51 values)
+source cpu_graph_data {
+    type: "script"
+    command: "scripts/cpu_graph_daemon"
+    interval: "1s"
+    output_format: "json_array"
+}
+
+// ============================================
+// Helper Components
+// ============================================
+
+component metric_bar [label, value, class] {
+    type: "box"
+    class: ["metric", class]
+    orientation: "horizontal"
+    space-evenly: false
+    
+    children: [
+        {
+            type: "label"
+            class: ["label"]
+            text: label
+        },
+        {
+            type: "scale"
+            class: ["cpustuffBar", class]
+            orientation: "horizontal"
+            value: value
+            min: 0
+            max: 100
+        }
+    ]
+}
+
+component graph_segment [data, flipped, class] {
+    type: "box"
+    class: ["cpu_graph_segments", class]
+    
+    children: [
+        // Iterate through graph data points
+        for point in data {
+            type: "scale"
+            class: ["cpu_graph_segment"]
+            orientation: "vertical"
+            value: point
+            flipped: flipped
+            min: 0
+            max: 100
+        }
+    ]
+}

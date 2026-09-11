@@ -1,0 +1,46 @@
+#!/bin/bash
+# Get CPU usage for each core as JSON array
+# Output: [core1_usage, core2_usage, ..., core8_usage]
+
+cpu_count=$(nproc --all)
+result="["
+
+for i in $(seq 0 $((cpu_count - 1))); do
+    # Read cpu$i stats
+    line=$(grep "cpu$i " /proc/stat)
+    read -r _ user nice system idle iowait irq softirq steal guest guest_nice <<< "$line"
+    
+    # Calculate totals
+    total=$((user + nice + system + idle + iowait + irq + softirq + steal))
+    idle_total=$((idle + iowait))
+    
+    # Get previous values from temp file
+    prev_file="/tmp/noctalia_cpu_prev_$i"
+    if [[ -f "$prev_file" ]]; then
+        read -r prev_total prev_idle < "$prev_file"
+        
+        # Calculate usage percentage
+        diff_total=$((total - prev_total))
+        diff_idle=$((idle_total - prev_idle))
+        
+        if [[ $diff_total -gt 0 ]]; then
+            usage=$(( (diff_total - diff_idle) * 100 / diff_total ))
+        else
+            usage=0
+        fi
+    else
+        usage=0
+    fi
+    
+    # Save current values
+    echo "$total $idle_total" > "$prev_file"
+    
+    # Add to result
+    if [[ $i -gt 0 ]]; then
+        result+=","
+    fi
+    result+="$usage"
+done
+
+result+="]"
+echo "$result"
