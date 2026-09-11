@@ -1,0 +1,86 @@
+// Noctalia Widget Configuration - Clock and Date
+// Ported from eww config
+
+widget clock_date {
+    type: "box"
+    orientation: "horizontal"
+    class: ["clock-widget", "side-widget"]
+    halign: "start"
+    space-evenly: false
+    
+    children: [
+        // Time display (HH:MM:SS)
+        {
+            type: "label"
+            class: ["time"]
+            halign: "start"
+            text: { format: "{0:02}:{1:02}:{2:02}", args: ["hour", "minute", "second"] }
+        }
+        
+        // Right side date container
+        {
+            type: "box"
+            class: ["rightdate"]
+            orientation: "vertical"
+            halign: "end"
+            space-evenly: false
+            
+            children: [
+                // Date button
+                {
+                    type: "button"
+                    class: ["date"]
+                    halign: "end"
+                    onclick: "toggle_calendar()"
+                    text: { format: "{0:02}.{1:02}.{2}", args: ["day", "month", "year"] }
+                }
+                
+                // Day of week
+                {
+                    type: "label"
+                    class: ["day"]
+                    halign: "end"
+                    text: { source: "weekday", interval: "1h" }
+                }
+            ]
+        }
+    ]
+}
+
+// Calendar widget (revealed on date click)
+widget calendar {
+    type: "box"
+    class: ["calendar"]
+    orientation: "horizontal"
+    
+    children: [
+        {
+            type: "calendar"
+            class: ["cal"]
+            day: { source: "day" }
+            month: { source: "month" }
+            year: { source: "year" }
+        }
+    ]
+}
+
+// Data sources for time
+source time_data {
+    type: "time"
+    update_interval: "1s"
+    
+    fields: [
+        "hour",
+        "minute", 
+        "second",
+        "day",
+        "month",
+        "year"
+    ]
+}
+
+source weekday {
+    type: "script"
+    command: "scripts/weekday"
+    interval: "1h"
+}

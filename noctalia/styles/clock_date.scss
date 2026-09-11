@@ -1,0 +1,85 @@
+// Noctalia Styles - Clock and Date Widget
+// Ported from eww.scss
+
+// Import shared variables (to be created)
+@import 'variables';
+
+.clock-widget {
+  min-width: 312px;
+  
+  .time, .date {
+    font-family: $LED;
+  }
+
+  .time {
+    color: #ffffff;
+    font-size: 55px;
+    margin-left: 10px;
+  }
+
+  .rightdate {
+    padding: 5px 0 0 14px;
+  }
+
+  .date {
+    font-size: 25px;
+    
+    // Button styling
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+    
+    &:active {
+      opacity: 0.6;
+    }
+  }
+
+  .day {
+    all: unset;
+    font: 15px Ubuntu, serif;
+    padding-top: 4px;
+  }
+}
+
+// Calendar widget styles
+.calendar {
+  background: $bg-color;
+  border-radius: 8px;
+  padding: 10px;
+  
+  .cal {
+    background: transparent;
+    color: $text-color;
+    font-family: Ubuntu, serif;
+    font-size: 14px;
+    
+    // Calendar specific styling
+    &.header {
+      color: $accent-color;
+      font-weight: bold;
+    }
+    
+    &.button {
+      border: none;
+      background: transparent;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+      }
+    }
+    
+    &.highlight {
+      color: $accent-color;
+      font-weight: bold;
+    }
+    
+    &.indifferent {
+      color: darken($text-color, 30%);
+    }
+  }
+}
