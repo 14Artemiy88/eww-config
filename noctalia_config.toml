@@ -1,0 +1,240 @@
+# Noctalia конфигурация на основе EWW виджетов
+# Скопируйте этот файл в ~/.config/noctalia/config.toml
+
+# ── Shell ─────────────────────────────────────────────────────────────────────
+
+[accessibility]
+ui_scale = 1.0
+
+[shell]
+corner_radius_scale = 1.0
+font_family = "sans-serif"
+time_format = "{:%H:%M}"
+date_format = "%A, %x"
+telemetry_enabled = false
+
+[shell.animation]
+enabled = true
+speed = 1.0
+
+# ── Bar ───────────────────────────────────────────────────────────────────────
+
+[bar.main]
+position = "top"
+thickness = 40
+background_opacity = 0.95
+radius = 12
+margin_ends = 100
+margin_edge = 10
+padding = 10
+widget_spacing = 8
+scale = 1.0
+shadow = true
+auto_hide = false
+reserve_space = true
+
+# Первая колонка - часы, CPU, топ приложений
+start = ["clock", "cpu_usage", "cpu_graph", "top_apps"]
+
+# Вторая колонка - громкость, CAVA визуализатор
+center = ["volume", "audio_vis"]
+
+end = ["control-center", "session"]
+
+# ── Widget Definitions ────────────────────────────────────────────────────────
+
+# ЧАСЫ И ДАТА (аналог date.yuck)
+[widget.clock]
+format = "{:%H:%M:%S}\n{:%d.%m.%Y}"
+vertical_format = "{:%H\n%M\n%S}"
+tooltip_format = "{:%A, %d %B %Y}"
+
+# Дополнительный виджет только для дня недели
+[widget.weekday]
+type = "text"
+text = "{weekday}"
+
+# ЗАГРУЗКА CPU (аналог cpu.yuck)
+[widget.cpu_usage]
+type = "sysmon"
+stat = "cpu_usage"
+visualization = "gauge"
+show_value = true
+show_glyph = true
+label_show_units = true
+
+# График загрузки CPU (аналог cpu_graph.yuck)
+[widget.cpu_graph]
+type = "sysmon"
+stat = "cpu_usage"
+visualization = "graph"
+show_value = false
+show_glyph = false
+
+# Детализация по ядрам (8 ядер как в оригинале)
+[widget.cpu_core1]
+type = "sysmon"
+stat = "cpu_core_0"
+visualization = "gauge"
+show_value = true
+
+[widget.cpu_core2]
+type = "sysmon"
+stat = "cpu_core_1"
+visualization = "gauge"
+show_value = true
+
+[widget.cpu_core3]
+type = "sysmon"
+stat = "cpu_core_2"
+visualization = "gauge"
+show_value = true
+
+[widget.cpu_core4]
+type = "sysmon"
+stat = "cpu_core_3"
+visualization = "gauge"
+show_value = true
+
+[widget.cpu_core5]
+type = "sysmon"
+stat = "cpu_core_4"
+visualization = "gauge"
+show_value = true
+
+[widget.cpu_core6]
+type = "sysmon"
+stat = "cpu_core_5"
+visualization = "gauge"
+show_value = true
+
+[widget.cpu_core7]
+type = "sysmon"
+stat = "cpu_core_6"
+visualization = "gauge"
+show_value = true
+
+[widget.cpu_core8]
+type = "sysmon"
+stat = "cpu_core_7"
+visualization = "gauge"
+show_value = true
+
+# RAM мониторинг
+[widget.ram_usage]
+type = "sysmon"
+stat = "ram_used"
+visualization = "gauge"
+show_value = true
+
+# ТОП ПРИЛОЖЕНИЙ (аналог top_apps.yuck)
+# Примечание: Noctalia не имеет встроенного виджета "топ приложений"
+# Это можно реализовать через кастомный скрипт или плагин
+# Временно используем текстовый виджет с командой
+
+[widget.top_apps]
+type = "text"
+# Скрипт для получения топ-5 приложений по CPU и памяти
+# text = "$(scripts/top_apps)"  # требует внешней реализации
+
+# ГРОМКОСТЬ (аналог volumes.yuck)
+[widget.volume]
+type = "volume"
+device = "output"
+show_label = true
+glyph = ""
+mute_glyph = ""
+mute_color = "error"
+
+# Микрофон
+[widget.mic_volume]
+type = "volume"
+device = "input"
+show_label = true
+hide_when_inactive = true
+
+# CAVA ВИЗУАЛИЗАТОР (аналог cava.yuck)
+[widget.audio_vis]
+type = "audio_visualizer"
+width = 300
+bands = 51
+mirrored = true
+centered = true
+show_when_idle = false
+color_1 = "primary"
+color_2 = "secondary"
+
+# ── System Monitor ────────────────────────────────────────────────────────────
+
+[system.monitor]
+# Глобальная частота обновления для sysmon виджетов
+update_interval_ms = 1000
+
+# ── Audio ─────────────────────────────────────────────────────────────────────
+
+[audio]
+enable_overdrive = false
+default_step = 5
+
+# ── Desktop Widgets ───────────────────────────────────────────────────────────
+
+[desktop_widgets]
+enabled = true
+
+# Часы на рабочем столе (большие как в EWW)
+[[desktop_widgets.widgets]]
+type = "clock"
+output = "auto"
+cx = 200.0
+cy = 100.0
+scale = 2.0
+rotation = 0.0
+
+[desktop_widgets.widgets.settings]
+format = "{:%H:%M:%S}"
+background_opacity = 0.0
+
+# Дата на рабочем столе
+[[desktop_widgets.widgets]]
+type = "clock"
+output = "auto"
+cx = 200.0
+cy = 180.0
+scale = 1.5
+
+[desktop_widgets.widgets.settings]
+format = "{:%d.%m.%Y}"
+background_opacity = 0.0
+
+# День недели
+[[desktop_widgets.widgets]]
+type = "clock"
+output = "auto"
+cx = 200.0
+cy = 230.0
+scale = 1.2
+
+[desktop_widgets.widgets.settings]
+format = "{:%A}"
+background_opacity = 0.0
+
+# ── Theme ─────────────────────────────────────────────────────────────────────
+
+[theme]
+mode = "dark"
+
+[theme.palette]
+# Цвета из оригинального EWW конфига
+primary = "#00CCCC"
+secondary = "#FF00FF"
+surface = "#0F0F1A"
+background = "#070722"
+error = "#FF5555"
+
+# ── Key Bindings ──────────────────────────────────────────────────────────────
+
+[binding.global."Mod4+Shift+C"]
+action = "panel-toggle control-center"
+
+[binding.global."Mod4+Shift+S"]
+action = "panel-toggle session"
