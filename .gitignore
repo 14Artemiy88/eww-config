@@ -1,21 +1,18 @@
 ```
-# Compiled and build artifacts
+# Qt/QML build artifacts
 *.qmlc
-
+qmldir
 # Dependencies
-node_modules/
-
-# Editors
+# Build directories
+build/
+dist/
+# IDE files
 .vscode/
 .idea/
-
-# Logs and temp files
-*.log
-*.tmp
 *.swp
-
-# Environment
-.env
-.env.local
-.env.*
+*.swo
+# Logs
+*.log
+# Temp files
+*.tmp
 ```
