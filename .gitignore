@@ -1,21 +1,54 @@
 ```
-# Compiled and build artifacts
+# Build artifacts
 *.qmlc
+*.jsc
 
 # Dependencies
-node_modules/
-
-# Editors
-.vscode/
-.idea/
+*.qrc
+*.rcc
 
 # Logs and temp files
 *.log
 *.tmp
-*.swp
 
-# Environment
-.env
-.env.local
-.env.*
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Qt specific
+*.pro.user
+*.pro.user.*
+*.pri.user
+*.pri.user.*
+
+# Coverage and testing
+coverage/
+htmlcov/
+.coverage
+
+# Compression files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
