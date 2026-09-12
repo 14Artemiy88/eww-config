@@ -1,0 +1,163 @@
+/* Main Panel */
+.main-panel {
+    background: rgba(30, 30, 46, 0.95);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Clock Widget */
+.clock-widget {
+    font-size: 55px;
+    font-weight: bold;
+    color: #f8f8f2;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Date Widget */
+.date-widget {
+    spacing: 4px;
+}
+
+.date-label {
+    font-size: 25px;
+    color: #bd93f9;
+}
+
+.weekday-label {
+    font-size: 15px;
+    color: #6272a4;
+    text-transform: capitalize;
+}
+
+/* CPU Monitor */
+.cpu-monitor {
+    spacing: 8px;
+    padding: 8px;
+    background: rgba(40, 42, 54, 0.5);
+    border-radius: 8px;
+}
+
+.cpu-bar, .ram-bar {
+    spacing: 8px;
+}
+
+.cpu-slider, .ram-slider {
+    min-width: 150px;
+    trough-color: rgba(98, 114, 164, 0.3);
+    highlight-color: #ff79c6;
+    slider-color: #f8f8f2;
+}
+
+/* Volume Control */
+.volume-control {
+    spacing: 8px;
+    padding: 8px;
+    background: rgba(40, 42, 54, 0.5);
+    border-radius: 8px;
+}
+
+.mute-btn {
+    padding: 4px;
+    background: transparent;
+}
+
+.mute-btn:hover {
+    background: rgba(98, 114, 164, 0.3);
+    border-radius: 4px;
+}
+
+.volume-slider {
+    min-width: 150px;
+    trough-color: rgba(98, 114, 164, 0.3);
+    highlight-color: #50fa7b;
+    slider-color: #f8f8f2;
+}
+
+/* CAVA Visualizer */
+.cava-visualizer {
+    spacing: 2px;
+    padding: 8px;
+    background: rgba(40, 42, 54, 0.5);
+    border-radius: 8px;
+    min-height: 60px;
+}
+
+.cava-bar {
+    background: linear-gradient(to top, #ff79c6, #bd93f9);
+    border-radius: 2px;
+    min-width: 4px;
+}
+
+/* Weather Widget */
+.weather-widget {
+    spacing: 8px;
+    padding: 8px;
+    background: rgba(40, 42, 54, 0.5);
+    border-radius: 8px;
+}
+
+.weather-temp {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffb86c;
+}
+
+.weather-desc {
+    font-size: 14px;
+    color: #f8f8f2;
+}
+
+.weather-city {
+    font-size: 12px;
+    color: #6272a4;
+}
+
+/* Player Widget */
+.player-widget {
+    spacing: 8px;
+    padding: 8px;
+    background: rgba(40, 42, 54, 0.5);
+    border-radius: 8px;
+}
+
+.player-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #f8f8f2;
+}
+
+.player-artist {
+    font-size: 12px;
+    color: #6272a4;
+}
+
+.player-widget button {
+    padding: 4px;
+    background: transparent;
+    color: #f8f8f2;
+}
+
+.player-widget button:hover {
+    background: rgba(98, 114, 164, 0.3);
+    border-radius: 4px;
+}
+
+/* Top Apps Widget */
+.top-apps-widget {
+    spacing: 16px;
+    padding: 8px;
+    background: rgba(40, 42, 54, 0.5);
+    border-radius: 8px;
+}
+
+.top-cpu, .top-mem {
+    spacing: 4px;
+}
+
+.top-cpu label, .top-mem label {
+    font-size: 11px;
+    color: #f8f8f2;
+    font-family: 'JetBrains Mono', monospace;
+}
