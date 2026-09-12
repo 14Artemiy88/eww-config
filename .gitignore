@@ -1,18 +1,55 @@
 ```
-# Qt/QML build artifacts
+# Build artifacts
 *.qmlc
-qmldir
+*.jsc
+
 # Dependencies
-# Build directories
-build/
-dist/
-# IDE files
+*.qrc
+*.rcc
+
+# Logs and temp files
+*.log
+# Temp files
+*.tmp
+
+# Editor/IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-# Logs
-*.log
-# Temp files
-*.tmp
+
+# Qt specific
+*.pro.user
+*.pro.user.*
+*.pri.user
+*.pri.user.*
+
+# Coverage and testing
+coverage/
+htmlcov/
+.coverage
+
+# Compression files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
