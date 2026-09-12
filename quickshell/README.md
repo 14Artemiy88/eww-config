@@ -1,133 +1,103 @@
-# Quickshell Widgets (EWW Port)
+# Quickshell Widgets Configuration
 
-Полный набор виджетов для Quickshell, портированный из EWW конфигурации.
-
-## Виджеты
-
-| Виджет | Описание | Обновление | Зависимости |
-|--------|----------|------------|-------------|
-| **Clock** | Время в формате HH:MM:SS | 1 сек | - |
-| **Date** | Дата и день недели на русском | 1 сек | - |
-| **CPU Monitor** | Загрузка CPU и RAM с графиками | 2 сек | - |
-| **Volume Control** | Громкость с mute/unmute |实时 | pipewire/pulseaudio |
-| **CAVA Visualizer** | 51 полоса частот | 50 мс | cava (опционально) |
-| **Weather** | Погода через Gismeteo API | 30 мин | токен Gismeteo |
-| **Player** | Управление плеером (MPRIS) | 2 сек | playerctl |
-| **Top Apps** | Топ-5 по CPU и RAM | 2 сек | - |
+Конфигурация виджетов для Quickshell на основе EWW конфига.
 
 ## Установка
 
 ### Ubuntu/Debian
 
 ```bash
-# 1. Установите Rust
+# Установите Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
 
-# 2. Установите зависимости
+# Установите зависимости
 sudo apt update
-sudo apt install -y \
-    libgtk-3-dev \
-    libglib2.0-dev \
-    libjavascriptcoregtk-4.1-dev \
-    libsoup-3.0-dev \
-    playerctl \
-    cava \
-    curl \
-    jq
+sudo apt install -y cmake clang libgtk-3-dev libglib2.0-dev libpulse-dev \
+    libcairo2-dev libpango1.0-dev libjavascriptcoregtk-4.0-dev \
+    libsoup2.4-dev libwebkit2gtk-4.0-dev playerctl cava curl jq
 
-# 3. Установите Quickshell
+# Установите Quickshell
 git clone https://github.com/quickshell-mirror/quickshell.git
 cd quickshell
 cargo build --release
 sudo cp target/release/quickshell /usr/local/bin/
-
-# 4. Настройте токен Gismeteo
-mkdir -p ~/.config/eww
-echo "YOUR_GISMETEO_TOKEN" > ~/.config/eww/token
-
-# 5. Скопируйте конфиг
-cp -r /workspace/quickshell/* ~/.config/quickshell/
-
-# 6. Запустите
-qs shell
 ```
 
 ### NixOS
 
-#### Через environment.systemPackages (глобально)
-
 ```nix
+# В configuration.nix или home-manager конфигурации
 environment.systemPackages = with pkgs; [
   quickshell
   playerctl
   cava
   curl
   jq
+  pactl  # или pipewire
 ];
 ```
 
-#### Через Home Manager (рекомендуется)
+## Настройка
 
-```nix
-{ pkgs, ... }: {
-  home.packages = with pkgs; [
-    quickshell
-    playerctl
-    cava
-    curl
-    jq
-  ];
-
-  # Настройка токена
-  home.file.".config/eww/token".text = "YOUR_GISMETEO_TOKEN";
-
-  # Копирование конфига
-  xdg.configFile."quickshell".source = /workspace/quickshell;
-}
+1. Скопируйте файлы конфигурации:
+```bash
+cp -r /workspace/quickshell/* ~/.config/quickshell/
 ```
 
-После применения конфигурации:
+2. Создайте файл с токеном Gismeteo API:
+```bash
+mkdir -p ~/.config/eww
+echo "YOUR_GISMETEO_TOKEN" > ~/.config/eww/token
+```
+
+3. Запустите Quickshell:
 ```bash
 qs shell
 ```
 
-## Настройка токена Gismeteo
+## Виджеты
 
-1. Получите токен на https://gismeteo.ru/api/
-2. Создайте файл `~/.config/eww/token`
-3. Вставьте токен в файл (одной строкой)
-4. Убедитесь, что права доступа: `chmod 600 ~/.config/eww/token`
+| Виджет | Описание | Зависимости |
+|--------|----------|-------------|
+| ClockWidget | Время в формате HH:MM:SS | - |
+| DateWidget | Дата и день недели | - |
+| CpuMonitorWidget | Загрузка 8 ядер CPU + RAM + график | /proc/stat |
+| VolumeWidget | Управление громкостью с слайдером | pactl/pipewire |
+| CavaWidget | 51-полосный аудио визуализатор | cava (опционально) |
+| WeatherWidget | Погода от Gismeteo | curl, токен API |
+| PlayerWidget | Управление медиаплеером | playerctl |
+| TopProcessesWidget | Топ-5 процессов по CPU/RAM | ps |
+| CalendarWidget | Календарь (popup) | - |
+| PowerMenuWidget | Меню питания (popup) | systemctl, swaylock |
 
-## Troubleshooting
-
-### Виджеты не отображаются
-- Проверьте, что Wayland композитор запущен
-- Убедитесь, что `qs shell` выполняется без ошибок
-
-### Погода не работает
-- Проверьте наличие токена в `~/.config/eww/token`
-- Убедитесь, что есть подключение к интернету
-
-### CAVA не работает
-- Установите `cava`: `sudo apt install cava`
-- Для реальной визуализации нужно настроить вывод cava в pipe
-
-### Громкость не меняется
-- Убедитесь, что установлен pipewire или pulseaudio
-- Проверьте работу `pactl` в терминале
-
-## Структура файлов
+## Структура проекта
 
 ```
 ~/.config/quickshell/
-├── main.tsx      # Основной код виджетов
-└── style.css     # Стили
+├── shell.qml          # Главный файл
+└── widgets/           # Компоненты виджетов
+    ├── ClockWidget.qml
+    ├── DateWidget.qml
+    ├── CpuMonitorWidget.qml
+    ├── VolumeWidget.qml
+    ├── CavaWidget.qml
+    ├── WeatherWidget.qml
+    ├── PlayerWidget.qml
+    ├── TopProcessesWidget.qml
+    ├── CalendarWidget.qml
+    └── PowerMenuWidget.qml
 ```
 
-## Отличия от EWW
+## Решение проблем
 
-- Используется TypeScript/JSX вместо Yuck
-- CSS вместо SCSS
-- Быстрая загрузка благодаря нативному GTK
-- Лучшая интеграция с Wayland
+- **Quickshell не запускается**: Убедитесь, что вы используете Wayland сессию
+- **Виджеты не отображаются**: Проверьте логи `journalctl -f` при запуске
+- **Погода не работает**: Проверьте токен в `~/.config/eww/token`
+- **Громкость не меняется**: Убедитесь, что установлен pactl/pipewire
+- **CAVA не работает**: Установите пакет `cava` и настройте вывод в совместимом формате
+
+## Примечания
+
+- Все стили используют цветовую схему Dracula
+- Виджеты календаря и питания скрыты по умолчанию и могут быть показаны по клику
+- CAVA визуализатор работает в демо-режиме (случайные значения), для реального использования требуется интеграция с cava через pipe
