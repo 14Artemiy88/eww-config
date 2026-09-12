@@ -9,6 +9,7 @@
 
 # Logs and temp files
 *.log
+# Temp files
 *.tmp
 
 # Editor/IDE
